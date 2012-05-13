@@ -16,6 +16,7 @@ public class NBChatServer {
 	private final int m_port;
 	private final Selector m_selector;
 	private final List<SelectionKey> m_clients = new ArrayList<SelectionKey>();
+	private final MessageMgr m_messageMgr = new MessageMgr();
 	
 	public NBChatServer(int port) throws Exception {
 		m_port = port;
@@ -23,33 +24,39 @@ public class NBChatServer {
 	}
 	
 	public void start() throws Exception {
+		// Setup the server channel as non-blocking.
 		ServerSocketChannel serverChannel = ServerSocketChannel.open();
 		serverChannel.configureBlocking(false);
+		
+		// Listen to client connections.
 		serverChannel.register(m_selector, SelectionKey.OP_ACCEPT);
 		
+		// Bind the server to localhost.
 		InetSocketAddress addr = new InetSocketAddress(m_port);
 		ServerSocket server = serverChannel.socket();
 		server.bind(addr);
 
 		System.out.println("server started on port " + m_port);
 		
+		// Listen for IO events
 		for (;;) {
 			int nkeys = m_selector.select();
+			
+			// Ignore false events.
 			if (nkeys == 0) {
 				continue;
 			}
 			
 			Iterator<SelectionKey> it = m_selector.selectedKeys().iterator();
-			
 			while (it.hasNext()) {
+				// Get and consume the event identifier.
 				SelectionKey key = it.next();
 				it.remove();
 				
+				// Handle the event.
 				if (!key.isValid()) {
 					continue;
-				}
-				
-				if (key.isAcceptable()) {
+				} else if (key.isAcceptable()) {
 					handleAccept(key);
 				} else if (key.isReadable()) {
 					handleRead(key);
@@ -61,50 +68,80 @@ public class NBChatServer {
 	}
 	
 	private void handleAccept(SelectionKey key) throws Exception {
+		// Get the incoming socket connection and set it as non-blocking.
 		ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
 		SocketChannel socketChannel = serverChannel.accept();
 		socketChannel.configureBlocking(false);
 
-		SelectionKey cliKey = socketChannel.register(m_selector, SelectionKey.OP_READ);
-		m_clients.add(cliKey);
+		// Listen client writes.
+		SelectionKey clientSelectionkey = socketChannel.register(m_selector, SelectionKey.OP_READ);
+		
+		// Add key to list of clients. Messages will be broadcast to 
+		// all clients.
+		m_clients.add(clientSelectionkey);
 	}
 	
-	private void handleRead(SelectionKey client) throws Exception {
-		SocketChannel socketChannel = (SocketChannel) client.channel();
+	private void handleRead(SelectionKey thisClient) throws Exception {
+		System.out.println("handlingRead...");
+		
+		// Read bytes into the buffer.
+		SocketChannel socketChannel = (SocketChannel) thisClient.channel();
 		ByteBuffer buffer = ByteBuffer.allocate(1024);
 		int size = socketChannel.read(buffer);
 
+		// Check if the client disconnected.
 		if (size == -1) {
-			client.cancel();
+			handleDisconnect(thisClient);
 		} else {
+			// Convert the bytes into a string using default charset.
 			buffer.flip();
-			
 			Charset charset = Charset.defaultCharset();
 			CharsetDecoder decoder = charset.newDecoder();
 			CharBuffer charBuff = decoder.decode(buffer);
+			String msg = charBuff.toString();
+	
+			System.out.println("received " + msg);
 			
-			System.out.println("received " + charBuff.toString());
-			
-			for (SelectionKey otherClient : m_clients) {
-				if (otherClient != client) {
-					otherClient.attach(charBuff.toString());
-					otherClient.interestOps(SelectionKey.OP_WRITE);
+			// Broadcast the message.
+			for (SelectionKey client : m_clients) {
+				if (client != thisClient) {
+					//client.attach(msg); ---> this would cause memory leaks.
+					m_messageMgr.addMessage(client, msg);
+
+					// Start listening to writes.
+					if (!client.isWritable()) {
+						client.interestOps(SelectionKey.OP_WRITE);
+					}
 				}
 			}
 		}
 	}
+
+	private void handleDisconnect(SelectionKey key) {
+		key.cancel();
+		m_clients.remove(key);
+	}
 	
 	private void handleWrite(SelectionKey key) throws Exception {
+		System.out.println("handlingWrite...");
 		try {
-			String message = (String) key.attachment();
-
+			// Get the pending messages for this client.
+			List<Message> messages = m_messageMgr.getMessages(key);
+			if (messages == null || messages.isEmpty()) {
+				return;
+			}
+			
+			// Write the messages.
 			SocketChannel socketChannel = (SocketChannel) key.channel();
-			socketChannel.write(ByteBuffer.wrap(message.getBytes()));
+			for (Message m : messages) {
+				socketChannel.write(ByteBuffer.wrap(m.content().getBytes()));
+			}
 
-			key.attach(null);
+			// Listen to the next read.
 			key.interestOps(SelectionKey.OP_READ);
 		} catch (Exception e) {
 			// OK, the guy may have disconnected
+			handleDisconnect(key);
 		}
 	}
 }
