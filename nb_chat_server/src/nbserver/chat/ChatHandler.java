@@ -14,7 +14,7 @@ import nbserver.Handler;
 
 public class ChatHandler implements Handler {
 	private final List<SelectionKey> m_clients = new ArrayList<SelectionKey>();
-	private final MessageMgr m_messageMgr = new MessageMgr();
+	private final MessageRepository m_messageMgr = new MessageRepository();
 
 	public void handleAccept(SelectionKey key) throws Exception {
 		// Get the incoming socket connection and set it as non-blocking.

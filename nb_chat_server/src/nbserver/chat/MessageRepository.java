@@ -13,19 +13,19 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MessageMgr {
+public class MessageRepository {
 	private static final long CLEANUP_INTERVAL = 50000L;
 	
-	private final Map<String, List<Message>> m_messages = Collections.synchronizedMap(new LinkedHashMap<String, List<Message>>());
-	private final Timer m_timer = new Timer();
+	private final Map<String, List<Message>> m_storedMessages = Collections.synchronizedMap(new LinkedHashMap<String, List<Message>>());
+	private final Timer m_cleanupTimer = new Timer();
 	private final TimerTask m_cleanupTask = new TimerTask() {
 		@Override public void run() {
 			handleCleanup();
 		}
 	};
 	
-	public MessageMgr() {
-		m_timer.schedule(m_cleanupTask, 0L, CLEANUP_INTERVAL);
+	public MessageRepository() {
+		m_cleanupTimer.schedule(m_cleanupTask, 0L, CLEANUP_INTERVAL);
 	}
 	
 	private synchronized void handleCleanup() {
@@ -33,7 +33,7 @@ public class MessageMgr {
 
 		// Go through all messages and remove old ones.
 		List<String> toBeRemoved = new ArrayList<String>();
-		for (Map.Entry<String, List<Message>> entry : m_messages.entrySet()) {
+		for (Map.Entry<String, List<Message>> entry : m_storedMessages.entrySet()) {
 
 			// Remove the messages.
 			List<Message> messages = entry.getValue();
@@ -53,7 +53,7 @@ public class MessageMgr {
 		// Remove marked map entries.
 		if (!toBeRemoved.isEmpty()) {
 			for (String key : toBeRemoved) {
-				m_messages.remove(key);
+				m_storedMessages.remove(key);
 			}
 		}
 	}
@@ -71,10 +71,10 @@ public class MessageMgr {
 	}
 
 	private synchronized List<Message> getPendingMessages(String ip) {
-		List<Message> pendingMessages = m_messages.get(ip);
+		List<Message> pendingMessages = m_storedMessages.get(ip);
 		if (pendingMessages == null) {
 			pendingMessages = new ArrayList<Message>();
-			m_messages.put(ip, pendingMessages);
+			m_storedMessages.put(ip, pendingMessages);
 		}
 		return pendingMessages;
 	}
@@ -97,12 +97,12 @@ public class MessageMgr {
 	
 	public synchronized List<Message> getMessages(SelectionKey selKey) {
 		// Get the IP address identifying the selection key.
-		String ip = getKeyIdentifier(selKey);
+		String id = getKeyIdentifier(selKey);
 		
 		// Get the list of pending messages for the client identified by selKey.
-		List<Message> pendingMessages = m_messages.get(ip);
+		List<Message> pendingMessages = m_storedMessages.get(id);
 		if (pendingMessages != null && !pendingMessages.isEmpty()) {
-			m_messages.remove(pendingMessages);
+			m_storedMessages.remove(pendingMessages);
 			return pendingMessages;
 		}
 		
