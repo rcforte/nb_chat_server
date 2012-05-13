@@ -1,4 +1,7 @@
+package nbserver.chat;
+
 import java.net.InetAddress;
+import java.net.Socket;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
@@ -31,24 +34,23 @@ public class MessageMgr {
 		// Go through all messages and remove old ones.
 		List<String> toBeRemoved = new ArrayList<String>();
 		for (Map.Entry<String, List<Message>> entry : m_messages.entrySet()) {
+
 			// Remove the messages.
 			List<Message> messages = entry.getValue();
-			Iterator<Message> it = messages.iterator();
-			while (it.hasNext()) {
+			for (Iterator<Message> it = messages.iterator(); it.hasNext(); ) {
 				Message message = it.next();
 				if (message.isOld()) {
-					System.out.println("removing: " + message.content());
 					it.remove();
 				}
 			}
 			
-			// Mark the map entries for removal.
+			// Mark empty message map entries for removal.
 			if (messages.isEmpty()) {
 				toBeRemoved.add(entry.getKey());
 			}
 		}
 		
-		// Remove entries marked.
+		// Remove marked map entries.
 		if (!toBeRemoved.isEmpty()) {
 			for (String key : toBeRemoved) {
 				m_messages.remove(key);
@@ -58,10 +60,10 @@ public class MessageMgr {
 	
 	public void addMessage(SelectionKey selKey, String msg) {
 		// Get the IP address identifying the selection key.
-		String ip = getIPAddress(selKey);
+		String id = getKeyIdentifier(selKey);
 		
 		// Get the list of pending messages. Create a new list if needed.
-		List<Message> pendingMessages = getPendingMessages(ip);
+		List<Message> pendingMessages = getPendingMessages(id);
 		
 		// Add the message to the list.
 		Message message = new Message(msg, System.currentTimeMillis());
@@ -77,24 +79,33 @@ public class MessageMgr {
 		return pendingMessages;
 	}
 
-	private String getIPAddress(SelectionKey selKey) {
-		String ip;
+	private String getKeyIdentifier(SelectionKey selKey) {
+		// Get hostname and port of key's socket.
 		SocketChannel socketChannel = (SocketChannel) selKey.channel();
-		InetAddress inetAddress = socketChannel.socket().getInetAddress();
-		ip = inetAddress.getHostAddress() + ":" + socketChannel.socket().getPort();
-		return ip;
+		Socket socket = socketChannel.socket();
+		InetAddress address = socketChannel.socket().getInetAddress();
+		String hostName = address.getHostAddress();
+		int port = socket.getPort();
+		
+		// Build identifier.
+		StringBuilder sb = new StringBuilder();
+		sb.append(hostName);
+		sb.append(":");
+		sb.append(port);
+		return sb.toString();
 	}
 	
 	public synchronized List<Message> getMessages(SelectionKey selKey) {
 		// Get the IP address identifying the selection key.
-		String ip = getIPAddress(selKey);
+		String ip = getKeyIdentifier(selKey);
 		
-		// Get the list of pending messages for this IP.
+		// Get the list of pending messages for the client identified by selKey.
 		List<Message> pendingMessages = m_messages.get(ip);
 		if (pendingMessages != null && !pendingMessages.isEmpty()) {
 			m_messages.remove(pendingMessages);
 			return pendingMessages;
 		}
+		
 		return null;
 	}
 }
