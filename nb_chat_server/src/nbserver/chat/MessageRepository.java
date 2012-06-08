@@ -15,7 +15,7 @@ import java.util.TimerTask;
 
 public class MessageRepository {
 	private static final long CLEANUP_INTERVAL = 50000L;
-	
+
 	private final Map<String, List<Message>> m_storedMessages = Collections.synchronizedMap(new LinkedHashMap<String, List<Message>>());
 	private final Timer m_cleanupTimer = new Timer();
 	private final TimerTask m_cleanupTask = new TimerTask() {
@@ -23,56 +23,46 @@ public class MessageRepository {
 			handleCleanup();
 		}
 	};
-	
+
 	public MessageRepository() {
 		m_cleanupTimer.schedule(m_cleanupTask, 0L, CLEANUP_INTERVAL);
 	}
-	
+
 	private synchronized void handleCleanup() {
-		System.out.println("cleanup running...");
-
-		// Go through all messages and remove old ones.
 		List<String> toBeRemoved = new ArrayList<String>();
-		for (Map.Entry<String, List<Message>> entry : m_storedMessages.entrySet()) {
-
-			// Remove the messages.
+		for(Map.Entry<String, List<Message>> entry : m_storedMessages.entrySet()) {
+			// Remove messages.
 			List<Message> messages = entry.getValue();
-			for (Iterator<Message> it = messages.iterator(); it.hasNext(); ) {
+			for(Iterator<Message> it = messages.iterator(); it.hasNext();) {
 				Message message = it.next();
-				if (message.isOld()) {
+				if(message.isOld()) {
 					it.remove();
 				}
 			}
-			
-			// Mark empty message map entries for removal.
-			if (messages.isEmpty()) {
+
+			// Remove empty entry.
+			if(messages.isEmpty()) {
 				toBeRemoved.add(entry.getKey());
 			}
 		}
-		
-		// Remove marked map entries.
-		if (!toBeRemoved.isEmpty()) {
-			for (String key : toBeRemoved) {
+		if(!toBeRemoved.isEmpty()) {
+			for(String key : toBeRemoved) {
 				m_storedMessages.remove(key);
 			}
 		}
 	}
-	
+
 	public void addMessage(SelectionKey selKey, String msg) {
-		// Get the IP address identifying the selection key.
+		// Add to pending.
 		String id = getKeyIdentifier(selKey);
-		
-		// Get the list of pending messages. Create a new list if needed.
 		List<Message> pendingMessages = getPendingMessages(id);
-		
-		// Add the message to the list.
 		Message message = new Message(msg, System.currentTimeMillis());
 		pendingMessages.add(message);
 	}
 
 	private synchronized List<Message> getPendingMessages(String ip) {
 		List<Message> pendingMessages = m_storedMessages.get(ip);
-		if (pendingMessages == null) {
+		if(pendingMessages == null) {
 			pendingMessages = new ArrayList<Message>();
 			m_storedMessages.put(ip, pendingMessages);
 		}
@@ -80,13 +70,13 @@ public class MessageRepository {
 	}
 
 	private String getKeyIdentifier(SelectionKey selKey) {
-		// Get hostname and port of key's socket.
+		// Get client info.
 		SocketChannel socketChannel = (SocketChannel) selKey.channel();
 		Socket socket = socketChannel.socket();
 		InetAddress address = socketChannel.socket().getInetAddress();
 		String hostName = address.getHostAddress();
 		int port = socket.getPort();
-		
+
 		// Build identifier.
 		StringBuilder sb = new StringBuilder();
 		sb.append(hostName);
@@ -94,18 +84,15 @@ public class MessageRepository {
 		sb.append(port);
 		return sb.toString();
 	}
-	
+
 	public synchronized List<Message> getMessages(SelectionKey selKey) {
-		// Get the IP address identifying the selection key.
+		// Get pending messages.
 		String id = getKeyIdentifier(selKey);
-		
-		// Get the list of pending messages for the client identified by selKey.
 		List<Message> pendingMessages = m_storedMessages.get(id);
-		if (pendingMessages != null && !pendingMessages.isEmpty()) {
+		if(pendingMessages != null && !pendingMessages.isEmpty()) {
 			m_storedMessages.remove(pendingMessages);
 			return pendingMessages;
 		}
-		
 		return null;
 	}
 }
