@@ -1,4 +1,4 @@
-package nbserver.chat;
+package nbchat.server;
 
 import java.net.InetAddress;
 import java.net.Socket;
@@ -19,7 +19,8 @@ public class MessageRepository {
 	private final Map<String, List<Message>> m_storedMessages = Collections.synchronizedMap(new LinkedHashMap<String, List<Message>>());
 	private final Timer m_cleanupTimer = new Timer();
 	private final TimerTask m_cleanupTask = new TimerTask() {
-		@Override public void run() {
+		@Override
+		public void run() {
 			handleCleanup();
 		}
 	};
@@ -30,23 +31,23 @@ public class MessageRepository {
 
 	private synchronized void handleCleanup() {
 		List<String> toBeRemoved = new ArrayList<String>();
-		for(Map.Entry<String, List<Message>> entry : m_storedMessages.entrySet()) {
+		for (Map.Entry<String, List<Message>> entry : m_storedMessages.entrySet()) {
 			// Remove messages.
 			List<Message> messages = entry.getValue();
-			for(Iterator<Message> it = messages.iterator(); it.hasNext();) {
+			for (Iterator<Message> it = messages.iterator(); it.hasNext();) {
 				Message message = it.next();
-				if(message.isOld()) {
+				if (message.isOld()) {
 					it.remove();
 				}
 			}
 
 			// Remove empty entry.
-			if(messages.isEmpty()) {
+			if (messages.isEmpty()) {
 				toBeRemoved.add(entry.getKey());
 			}
 		}
-		if(!toBeRemoved.isEmpty()) {
-			for(String key : toBeRemoved) {
+		if (!toBeRemoved.isEmpty()) {
+			for (String key : toBeRemoved) {
 				m_storedMessages.remove(key);
 			}
 		}
@@ -62,7 +63,7 @@ public class MessageRepository {
 
 	private synchronized List<Message> getPendingMessages(String ip) {
 		List<Message> pendingMessages = m_storedMessages.get(ip);
-		if(pendingMessages == null) {
+		if (pendingMessages == null) {
 			pendingMessages = new ArrayList<Message>();
 			m_storedMessages.put(ip, pendingMessages);
 		}
@@ -89,7 +90,7 @@ public class MessageRepository {
 		// Get pending messages.
 		String id = getKeyIdentifier(selKey);
 		List<Message> pendingMessages = m_storedMessages.get(id);
-		if(pendingMessages != null && !pendingMessages.isEmpty()) {
+		if (pendingMessages != null && !pendingMessages.isEmpty()) {
 			m_storedMessages.remove(pendingMessages);
 			return pendingMessages;
 		}

@@ -1,4 +1,4 @@
-package nbserver.chat;
+package nbchat.server;
 
 public class Message {
 	private static final int LIMIT_TIME = 10000;

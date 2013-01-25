@@ -1,4 +1,4 @@
-package nbserver;
+package nbchat.server;
 
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -9,23 +9,18 @@ import java.util.Iterator;
 
 /** non blocking server */
 public class NBServer {
-	// vars
 	private final int m_port;
 	private final Selector m_selector;
 	private final Dispatcher m_dispatcher;
 
-	public 
-	NBServer(Dispatcher dispatcher, int port) throws Exception 
-	{
+	public NBServer(Dispatcher dispatcher, int port) throws Exception {
 		m_dispatcher = dispatcher;
 		m_port = port;
 		m_selector = Selector.open();
 	}
 
 	/** performs NIO plumbing */
-	public void 
-	start() throws Exception 
-	{
+	public void start() throws Exception {
 		ServerSocketChannel channel = ServerSocketChannel.open();
 		channel.configureBlocking(false);
 		channel.register(m_selector, SelectionKey.OP_ACCEPT);
@@ -34,7 +29,7 @@ public class NBServer {
 		server.bind(new InetSocketAddress(m_port));
 		System.out.println("server started on port " + m_port);
 
-		for ( ; ; ) {
+		for (;;) {
 			if (m_selector.select() == 0) {
 				continue;
 			}
