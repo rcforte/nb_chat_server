@@ -1,0 +1,17 @@
+package nbserver.message;
+
+option java_package = "nbchat.message";
+option java_outer_classname = "Chat";
+
+message ResponseMessage {
+  repeated string chatRoom = 1;
+}
+
+message RequestMessage {
+  enum Type {
+    GET_ROOMS = 0;
+  }
+
+  required Type type = 1;
+  optional string userName = 2;
+}
