@@ -1,4 +1,4 @@
-import nbchat.server.ChatServer;
+import chat.server.ChatServer;
 
 public class Main {
 	public static void main(String[] args) throws Exception {

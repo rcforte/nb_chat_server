@@ -1,4 +1,4 @@
-package nbchat.server;
+package chat.server;
 
 import static org.junit.Assert.assertEquals;
 
@@ -7,9 +7,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import chat.server.ChatServer;
 
 public class ChatTest {
 	private ExecutorService m_executor = Executors.newFixedThreadPool(2);

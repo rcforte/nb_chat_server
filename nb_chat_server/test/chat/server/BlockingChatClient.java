@@ -1,11 +1,12 @@
-package nbchat.server;
+package chat.server;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import nbchat.client.ChatClient;
 
 import org.apache.log4j.Logger;
+
+import chat.client.ChatClient;
 
 final class BlockingChatClient extends ChatClient {
 	private static final Logger s_logger = Logger.getLogger(BlockingChatClient.class);

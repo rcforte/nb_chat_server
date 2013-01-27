@@ -1,4 +1,4 @@
-package nbchat.gui;
+package chat.gui;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;

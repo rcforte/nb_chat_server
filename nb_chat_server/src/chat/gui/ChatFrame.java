@@ -1,4 +1,4 @@
-package nbchat.gui;
+package chat.gui;
 
 import java.awt.BorderLayout;
 import java.util.List;
@@ -14,8 +14,9 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
-import nbchat.client.ChatClient;
-import nbchat.client.ChatListener;
+import chat.client.ChatClient;
+import chat.client.ChatListener;
+
 
 public class ChatFrame extends JFrame {
 	private ChatClient m_chatClient;

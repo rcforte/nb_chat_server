@@ -1,4 +1,4 @@
-package nbchat.server;
+package chat.server;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,10 +19,11 @@ import java.util.Queue;
 
 import org.apache.log4j.Logger;
 
-import nbchat.message.Chat.RequestMessage;
-import nbchat.message.Chat.RequestMessage.Type;
-import nbchat.message.Chat.ResponseMessage;
-import nbchat.server.chat.ChatUser;
+
+import chat.message.Chat.RequestMessage;
+import chat.message.Chat.ResponseMessage;
+import chat.message.Chat.RequestMessage.Type;
+import chat.server.chat.ChatUser;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 

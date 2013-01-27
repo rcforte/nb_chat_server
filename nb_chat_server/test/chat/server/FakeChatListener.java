@@ -1,11 +1,12 @@
-package nbchat.server;
+package chat.server;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import nbchat.client.ChatListener;
+import chat.client.ChatListener;
+
 
 final class FakeChatListener implements ChatListener {
 	private static final Logger s_logger = Logger.getLogger(FakeChatListener.class);

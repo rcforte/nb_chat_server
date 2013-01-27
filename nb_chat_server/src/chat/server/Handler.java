@@ -1,4 +1,4 @@
-package nbchat.server;
+package chat.server;
 
 import java.nio.channels.SelectionKey;
 

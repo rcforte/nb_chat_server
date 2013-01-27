@@ -1,4 +1,4 @@
-package nbchat.client;
+package chat.client;
 
 import java.util.List;
 
