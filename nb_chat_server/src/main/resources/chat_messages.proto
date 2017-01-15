@@ -12,6 +12,6 @@ message RequestMessage {
     GET_ROOMS = 0;
   }
 
-  required Type type = 1;
+  required Type requestMessageType = 1;
   optional string userName = 2;
 }

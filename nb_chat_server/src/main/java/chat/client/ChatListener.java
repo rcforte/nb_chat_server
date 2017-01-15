@@ -1,11 +1,9 @@
 package chat.client;
 
+import chat.common.ResponseMessage;
+
 import java.util.List;
 
 public interface ChatListener {
-	public void onConnected();
-
-	public void onChatRooms(List<String> rooms);
-
-	public void onFail(String reason);
+	void onChatEvent(ResponseMessage responseMessage);
 }

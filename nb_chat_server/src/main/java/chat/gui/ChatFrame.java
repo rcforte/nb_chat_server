@@ -1,6 +1,7 @@
 package chat.gui;
 
 import java.awt.BorderLayout;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,48 +17,37 @@ import javax.swing.border.TitledBorder;
 
 import chat.client.ChatClient;
 import chat.client.ChatListener;
+import chat.common.ResponseMessage;
+import org.apache.log4j.Logger;
 
 
 public class ChatFrame extends JFrame {
-	private ChatClient m_chatClient;
-	private final ExecutorService m_executor = Executors.newCachedThreadPool();
+	private static final Logger logger = Logger.getLogger(ChatFrame.class);
+
+	private final ExecutorService executorService = Executors.newCachedThreadPool();
+	private final ChatListener chatListener = new ChatListener() {
+
+		@Override
+		public void onChatEvent(ResponseMessage responseMessage) {
+
+		}
+	};
+
+	private ChatClient chatClient;
 
 	public ChatFrame() {
 		super("Chat Window");
-
-		// Client blocks waiting for backend data, so put in another thread
-		m_executor.execute(new Runnable() {
-			@Override
-			public void run() {
-				startChatClient();
-			}
-		});
+		executorService.execute(() -> startChatClient());
 	}
 
 	private void startChatClient() {
-		m_chatClient = new ChatClient();
-		m_chatClient.addListener(new ChatListener() {
-			@Override
-			public void onConnected() {
-				m_chatClient.getChatRooms();
-			}
-
-			@Override
-			public void onChatRooms(final List<String> rooms) {
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						buildChatRoomsView(rooms);
-					}
-				});
-			}
-
-			@Override
-			public void onFail(String reason) {
-				System.out.println(reason);
-			}
-		});
-		m_chatClient.connect();
+		try {
+			chatClient = new ChatClient("localhost", 9999);
+			chatClient.addChatListener(chatListener);
+			chatClient.connect();
+		} catch (IOException e) {
+			logger.error("Cannot connect to server", e);
+		}
 	}
 
 	private void buildChatRoomsView(List<String> rooms) {
