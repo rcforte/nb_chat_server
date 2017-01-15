@@ -34,12 +34,14 @@ public class ChatServer {
         if (networkEvent.getType() == NetworkEventType.READ) {
             SocketChannel socketChannel = networkEvent.getSocketChannel();
             byte[] data = networkEvent.getData();
-            RequestMessage request = RequestMessage.fromBytes(data);
-            if (request.getRequestMessageType() == RequestMessageType.GET_ROOMS) {
-                ResponseMessage response = new ResponseMessage();
-                response.addRoom("room1");
-                response.addRoom("room2");
-                String json = response.toJson();
+            RequestMessage requestMessage = RequestMessage.fromBytes(data);
+            if (requestMessage.getRequestMessageType() == RequestMessageType.GET_ROOMS) {
+                ResponseMessage responseMessage = new ResponseMessage();
+                responseMessage.setCorrelationId(requestMessage.getCorrelationId());
+                responseMessage.addRoom("room1");
+                responseMessage.addRoom("room2");
+
+                String json = responseMessage.toJson();
                 byte[] jsonBytes = json.getBytes();
                 network.broadcast(jsonBytes);
             }

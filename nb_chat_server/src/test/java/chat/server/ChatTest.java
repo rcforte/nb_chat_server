@@ -1,6 +1,7 @@
 package chat.server;
 
 import chat.client.ChatClient;
+import chat.common.RequestMessage;
 import chat.common.ResponseMessage;
 import com.google.common.collect.Lists;
 import org.junit.After;
@@ -9,10 +10,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.*;
 
+import static chat.common.RequestMessageType.GET_ROOMS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -29,39 +31,36 @@ public class ChatTest {
 
         chatClient = new ChatClient("localhost", 9999);
         chatClient.connect();
-        Thread.sleep(1000);
     }
 
     @After
-    public void tearDown() throws IOException{
+    public void tearDown() throws IOException {
+        chatClient.stop();
         chatServer.stop();
     }
 
 
     @Test
-    @Ignore
-    public void shouldConnect() {
-        //assertEquals(FakeChatListener.ON_CONNECTED, fakeChatListener.getResult());
-    }
+    public void sendsWithProcessor() throws Exception {
+        String correlationId = UUID.randomUUID().toString();
+        RequestMessage requestMessage = new RequestMessage();
+        requestMessage.setRequestMessageType(GET_ROOMS);
+        requestMessage.setCorrelationId(correlationId);
 
-    @Test
-    @Ignore
-    public void shouldFailConnectWhenServerIsStopped() throws IOException{
-        chatServer.stop();
-        try {
-            TimeUnit.SECONDS.sleep(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-//        startClient();
-//        assertEquals(FakeChatListener.ON_FAIL, fakeChatListener.getResult());
+        BlockingQueue<ResponseMessage> blockingQueue = new LinkedBlockingDeque<>();
+        chatClient.send(requestMessage, responseMessage -> blockingQueue.offer(responseMessage));
+
+        ResponseMessage responseMessage = blockingQueue.poll(3L, TimeUnit.SECONDS);
+        assertNotNull("server did not return response", responseMessage);
+
+        List<String> expected = Lists.newArrayList("room1", "room2");
+        assertEquals(expected, responseMessage.getRooms());
     }
 
     @Test
     public void sendsGetRoomsRequest() throws Exception {
         BlockingQueue<ResponseMessage> blockingQueue = new LinkedBlockingDeque<>();
-        chatClient.addChatListener(responseMessage -> blockingQueue.offer(responseMessage));
-        chatClient.getChatRooms();
+        chatClient.getChatRooms(responseMessage -> blockingQueue.offer(responseMessage));
 
         ResponseMessage responseMessage = blockingQueue.poll(3L, TimeUnit.SECONDS);
         assertNotNull("server did not return response", responseMessage);

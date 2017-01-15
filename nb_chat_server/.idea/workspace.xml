@@ -2,32 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d7071290-5f33-4fb6-a6e2-874679bf8fca" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_code_gson_gson_2_8_0.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/chat/common/RequestMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/chat/common/RequestMessageType.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/chat/common/ResponseMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/chat/server/NetworkEvent.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/chat/server/NetworkEventType.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/chat/server/NetworkListener.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/chat/server/NonBlockingNetwork.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/chat/server/SelectHandler.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_protobuf_protobuf_java_3_2_0_rc_1.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/chat/message/Chat.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/chat/server/Message.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/chat/server/MessageRepository.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/chat/server/WriteTicket.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/test/java/chat/server/BlockingChatClient.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/test/java/chat/server/FakeChatListener.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/test/java/chat/server/FakeSelectionKey.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/test/java/chat/server/FakeServerSocketChannel.java" afterPath="" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/chat/client/Processor.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/compiler.xml" afterPath="$PROJECT_DIR$/.idea/compiler.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_code_gson_gson_2_8_0.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_code_gson_gson_2_8_0.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_guava_guava_21_0.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_guava_guava_21_0.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__junit_junit_4_12.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__junit_junit_4_12.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__log4j_log4j_1_2_17.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__log4j_log4j_1_2_17.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_hamcrest_hamcrest_core_1_3.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_hamcrest_hamcrest_core_1_3.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nb_chat_server.iml" afterPath="$PROJECT_DIR$/nb_chat_server.iml" />
@@ -35,9 +19,17 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Main.java" afterPath="$PROJECT_DIR$/src/main/java/Main.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/chat/client/ChatClient.java" afterPath="$PROJECT_DIR$/src/main/java/chat/client/ChatClient.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/chat/client/ChatListener.java" afterPath="$PROJECT_DIR$/src/main/java/chat/client/ChatListener.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/chat/common/RequestMessage.java" afterPath="$PROJECT_DIR$/src/main/java/chat/common/RequestMessage.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/chat/common/RequestMessageType.java" afterPath="$PROJECT_DIR$/src/main/java/chat/common/RequestMessageType.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/chat/common/ResponseMessage.java" afterPath="$PROJECT_DIR$/src/main/java/chat/common/ResponseMessage.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/chat/gui/ChatFrame.java" afterPath="$PROJECT_DIR$/src/main/java/chat/gui/ChatFrame.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/chat/server/ChatServer.java" afterPath="$PROJECT_DIR$/src/main/java/chat/server/ChatServer.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/chat/server/Handler.java" afterPath="$PROJECT_DIR$/src/main/java/chat/server/Handler.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/chat/server/NetworkEvent.java" afterPath="$PROJECT_DIR$/src/main/java/chat/server/NetworkEvent.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/chat/server/NetworkEventType.java" afterPath="$PROJECT_DIR$/src/main/java/chat/server/NetworkEventType.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/chat/server/NetworkListener.java" afterPath="$PROJECT_DIR$/src/main/java/chat/server/NetworkListener.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/chat/server/NonBlockingNetwork.java" afterPath="$PROJECT_DIR$/src/main/java/chat/server/NonBlockingNetwork.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/chat/server/SelectHandler.java" afterPath="$PROJECT_DIR$/src/main/java/chat/server/SelectHandler.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/resources/chat_messages.proto" afterPath="$PROJECT_DIR$/src/main/resources/chat_messages.proto" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/chat/server/ChatTest.java" afterPath="$PROJECT_DIR$/src/test/java/chat/server/ChatTest.java" />
     </list>
@@ -55,14 +47,13 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="ChatClient.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/java/chat/client/ChatClient.java">
+      <file leaf-file-name="ChatTest.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/test/java/chat/server/ChatTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="246">
-              <caret line="43" column="0" lean-forward="true" selection-start-line="43" selection-start-column="0" selection-end-line="43" selection-end-column="0" />
+            <state relative-caret-position="476">
+              <caret line="60" column="26" lean-forward="false" selection-start-line="60" selection-start-column="26" selection-end-line="60" selection-end-column="26" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#721#735#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -108,10 +99,11 @@
         <option value="$PROJECT_DIR$/src/main/java/chat/common/ResponseMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/chat/client/ChatListener.java" />
         <option value="$PROJECT_DIR$/src/main/java/chat/gui/ChatFrame.java" />
-        <option value="$PROJECT_DIR$/src/test/java/chat/server/ChatTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/chat/server/SelectHandler.java" />
         <option value="$PROJECT_DIR$/src/main/java/chat/server/NonBlockingNetwork.java" />
+        <option value="$PROJECT_DIR$/src/main/java/chat/client/Processor.java" />
         <option value="$PROJECT_DIR$/src/main/java/chat/server/ChatServer.java" />
+        <option value="$PROJECT_DIR$/src/test/java/chat/server/ChatTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/chat/client/ChatClient.java" />
       </list>
     </option>
@@ -384,10 +376,11 @@
     <property name="aspect.path.notification.shown" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/pom.xml" />
     <property name="js.eslint.eslintPackage" value="" />
-    <property name="last_directory_selection" value="$PROJECT_DIR$/src/main/java/chat/server" />
+    <property name="last_directory_selection" value="$PROJECT_DIR$/src/main/java/chat/client" />
   </component>
   <component name="RecentsManager">
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="chat.client" />
       <recent name="chat.server" />
     </key>
   </component>
@@ -966,44 +959,44 @@
       <option name="presentableId" value="Default" />
       <updated>1484500431582</updated>
       <workItem from="1484500433546" duration="429000" />
-      <workItem from="1484501137474" duration="11104000" />
+      <workItem from="1484501137474" duration="12161000" />
     </task>
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="ChatTest_sendsGetRoomsRequest - 2017.01.15 at 15h 11m 23s.xml">
-      <configuration name="ChatTest.sendsGetRoomsRequest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="ChatTest_sendsGetRoomsRequest - 2017.01.15 at 15h 14m 10s.xml">
-      <configuration name="ChatTest.sendsGetRoomsRequest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="ChatTest_sendsGetRoomsRequest - 2017.01.15 at 15h 16m 15s.xml">
-      <configuration name="ChatTest.sendsGetRoomsRequest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="ChatTest_sendsGetRoomsRequest - 2017.01.15 at 15h 19m 11s.xml">
-      <configuration name="ChatTest.sendsGetRoomsRequest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="ChatTest_sendsGetRoomsRequest - 2017.01.15 at 15h 20m 56s.xml">
-      <configuration name="ChatTest.sendsGetRoomsRequest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="ChatTest_sendsGetRoomsRequest - 2017.01.15 at 15h 24m 23s.xml">
-      <configuration name="ChatTest.sendsGetRoomsRequest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="ChatTest_sendsGetRoomsRequest - 2017.01.15 at 15h 27m 24s.xml">
-      <configuration name="ChatTest.sendsGetRoomsRequest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="ChatTest_sendsGetRoomsRequest - 2017.01.15 at 15h 28m 11s.xml">
-      <configuration name="ChatTest.sendsGetRoomsRequest" configurationId="JUnit" />
-    </history-entry>
     <history-entry file="ChatTest_sendsGetRoomsRequest - 2017.01.15 at 15h 29m 01s.xml">
       <configuration name="ChatTest.sendsGetRoomsRequest" configurationId="JUnit" />
     </history-entry>
     <history-entry file="ChatTest_sendsGetRoomsRequest - 2017.01.15 at 15h 30m 48s.xml">
       <configuration name="ChatTest.sendsGetRoomsRequest" configurationId="JUnit" />
     </history-entry>
+    <history-entry file="ChatTest_sendsGetRoomsRequest - 2017.01.15 at 15h 39m 11s.xml">
+      <configuration name="ChatTest.sendsGetRoomsRequest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="ChatTest_sendsGetRoomsRequest - 2017.01.15 at 15h 40m 01s.xml">
+      <configuration name="ChatTest.sendsGetRoomsRequest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="ChatTest_sendsGetRoomsRequest - 2017.01.15 at 15h 40m 21s.xml">
+      <configuration name="ChatTest.sendsGetRoomsRequest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="ChatTest_sendsGetRoomsRequest - 2017.01.15 at 15h 40m 50s.xml">
+      <configuration name="ChatTest.sendsGetRoomsRequest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="ChatTest_sendsGetRoomsRequest - 2017.01.15 at 15h 41m 10s.xml">
+      <configuration name="ChatTest.sendsGetRoomsRequest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="ChatTest_sendsGetRoomsRequest - 2017.01.15 at 15h 41m 53s.xml">
+      <configuration name="ChatTest.sendsGetRoomsRequest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="ChatTest_sendsGetRoomsRequest - 2017.01.15 at 15h 45m 29s.xml">
+      <configuration name="ChatTest.sendsGetRoomsRequest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="ChatTest_sendsGetRoomsRequest - 2017.01.15 at 15h 48m 02s.xml">
+      <configuration name="ChatTest.sendsGetRoomsRequest" configurationId="JUnit" />
+    </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="11533000" />
+    <option name="totallyTimeSpent" value="12590000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="0" width="1924" height="1047" extended-state="0" />
@@ -1078,7 +1071,9 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager />
+    <breakpoint-manager>
+      <option name="time" value="1" />
+    </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="antWorkspaceConfiguration">
@@ -1312,24 +1307,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/chat/server/ChatTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="67" column="0" lean-forward="true" selection-start-line="67" selection-start-column="0" selection-end-line="67" selection-end-column="0" />
-          <folding>
-            <marker date="1484510785230" expanded="true" signature="29:425" ph="..." />
-            <marker date="1484510785230" expanded="true" signature="661:854" ph="{...}" />
-            <marker date="1484510785230" expanded="true" signature="912:946" ph="{...}" />
-            <marker date="1484510785230" expanded="true" signature="953:970" ph="@{...}" />
-            <marker date="1484510785230" expanded="true" signature="1003:1095" ph="{...}" />
-            <marker date="1484510785230" expanded="true" signature="1101:1118" ph="@{...}" />
-            <marker date="1484510785230" expanded="true" signature="1192:1470" ph="{...}" />
-            <marker date="1484510785230" expanded="true" signature="1360:1464" ph="//..." />
-            <marker date="1484510785230" expanded="true" signature="1538:2047" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/chat/server/SelectHandler.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="215">
@@ -1372,27 +1349,58 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/chat/client/Processor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="10" column="0" lean-forward="true" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+          <folding>
+            <marker date="1484512742485" expanded="true" signature="59:101" ph="/**...*/" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/chat/server/ChatServer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="476">
-          <caret line="28" column="42" lean-forward="true" selection-start-line="28" selection-start-column="8" selection-end-line="28" selection-end-column="42" />
+        <state relative-caret-position="272">
+          <caret line="34" column="26" lean-forward="false" selection-start-line="34" selection-start-column="26" selection-end-line="34" selection-end-column="26" />
           <folding>
-            <marker date="1484512239465" expanded="true" signature="29:232" ph="..." />
-            <marker date="1484512239465" expanded="true" signature="535:675" ph="{...}" />
-            <marker date="1484512239465" expanded="true" signature="720:755" ph="{...}" />
-            <marker date="1484512239465" expanded="true" signature="799:873" ph="{...}" />
-            <marker date="1484512239465" expanded="true" signature="918:1588" ph="{...}" />
+            <marker date="1484512904595" expanded="true" signature="29:232" ph="..." />
+            <marker date="1484512904595" expanded="true" signature="535:675" ph="{...}" />
+            <marker date="1484512904595" expanded="true" signature="720:755" ph="{...}" />
+            <marker date="1484512904595" expanded="true" signature="799:873" ph="{...}" />
+            <marker date="1484512904595" expanded="true" signature="918:1716" ph="{...}" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/chat/client/ChatClient.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="246">
-          <caret line="43" column="0" lean-forward="true" selection-start-line="43" selection-start-column="0" selection-end-line="43" selection-end-column="0" />
+        <state relative-caret-position="306">
+          <caret line="65" column="0" lean-forward="false" selection-start-line="65" selection-start-column="0" selection-end-line="65" selection-end-column="0" />
+          <folding>
+            <marker date="1484513274171" expanded="true" signature="29:663" ph="..." />
+            <marker date="1484513274171" expanded="true" signature="893:907" ph="&lt;~&gt;" />
+            <marker date="1484513274171" expanded="true" signature="1193:1332" ph="{...}" />
+            <marker date="1484513274171" expanded="false" signature="1389:1394" ph=" { " />
+            <marker date="1484513274171" expanded="false" signature="1426:1429" ph=" }" />
+            <marker date="1484513274171" expanded="false" signature="1489:1494" ph=" { " />
+            <marker date="1484513274171" expanded="false" signature="1529:1532" ph=" }" />
+            <marker date="1484513274171" expanded="true" signature="1576:1611" ph="{...}" />
+            <marker date="1484513274171" expanded="true" signature="1633:1742" ph="{...}" />
+            <marker date="1484513274171" expanded="true" signature="1791:2231" ph="{...}" />
+            <marker date="1484513274171" expanded="true" signature="2303:2739" ph="{...}" />
+            <marker date="1484513274171" expanded="true" signature="2781:3424" ph="{...}" />
+            <marker date="1484513274171" expanded="true" signature="3485:3591" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/chat/server/ChatTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="476">
+          <caret line="60" column="26" lean-forward="false" selection-start-line="60" selection-start-column="26" selection-end-line="60" selection-end-column="26" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#721#735#0" expanded="true" />
           </folding>
         </state>
       </provider>
