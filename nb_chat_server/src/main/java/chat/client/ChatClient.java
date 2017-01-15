@@ -25,55 +25,55 @@ import chat.message.Chat.RequestMessage.Type;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class ChatClient {
-	private static final Logger s_logger = Logger.getLogger(ChatClient.class);
+	private static final Logger LOGGER = Logger.getLogger(ChatClient.class);
 	
-	private final List<ChatListener> m_listeners = new CopyOnWriteArrayList<ChatListener>();
-	private final Queue<ByteBuffer> m_outputQueue = new LinkedList<ByteBuffer>();
-	private final Map<Integer, RequestMessage> m_pendingRequests = new HashMap<Integer, RequestMessage>();
-	private int m_nextRequestId;
-	private Selector m_selector;
-	private volatile boolean m_stop;
+	private final List<ChatListener> chatListeners = new CopyOnWriteArrayList<ChatListener>();
+	private final Queue<ByteBuffer> outputQueue = new LinkedList<ByteBuffer>();
+	private final Map<Integer, RequestMessage> pendingRequests = new HashMap<Integer, RequestMessage>();
+	private int nextRequestId;
+	private Selector selector;
+	private volatile boolean stopped;
 	
 	public void stop() {
-		s_logger.info("requesting server stop...");
-		m_stop = true;
-		m_selector.wakeup();
+		LOGGER.info("requesting server stop...");
+		stopped = true;
+		selector.wakeup();
 	}
 	
 	public void addListener(ChatListener listener) {
-		m_listeners.add(listener);
+		chatListeners.add(listener);
 	}
 
 	public void connect() {
 		try {
-			m_selector = Selector.open();
+			selector = Selector.open();
 			SocketChannel channel = SocketChannel.open();
 			channel.configureBlocking(false);
-			SelectionKey theKey = channel.register(m_selector, SelectionKey.OP_CONNECT);
+			SelectionKey theKey = channel.register(selector, SelectionKey.OP_CONNECT);
 			channel.connect(new InetSocketAddress("localhost", 9999));
-			s_logger.info("requesting connetion...");
+			LOGGER.info("requesting connetion...");
 			
 			for(;;) {
-				if(m_stop) {
+				if(stopped) {
 					break;
 				}
 				
 				// Set write interest if there is any pending write
-				synchronized(m_outputQueue) {
-					if(!m_outputQueue.isEmpty()) {
-						s_logger.debug("setting key interest to write...");
+				synchronized(outputQueue) {
+					if(!outputQueue.isEmpty()) {
+						LOGGER.debug("setting key interest to write...");
 						if(theKey.isValid()) {
 							theKey.interestOps(SelectionKey.OP_WRITE);
 						}
 					}
 				}
 
-				int n = m_selector.select();
+				int n = selector.select();
 				if(n == 0) {
 					continue;
 				}
 
-				Iterator<SelectionKey> keys = m_selector.selectedKeys().iterator();
+				Iterator<SelectionKey> keys = selector.selectedKeys().iterator();
 				while(keys.hasNext()) {
 					SelectionKey key = keys.next();
 					keys.remove();
@@ -92,7 +92,7 @@ public class ChatClient {
 			}
 			
 			// Stop client gracefully
-			m_selector.close();
+			selector.close();
 			channel.close();
 		} catch(Exception e) {
 			handleFail(e);
@@ -102,7 +102,7 @@ public class ChatClient {
 	private void handleFail(Exception e) {
 		preProcessEvent();
 		try {
-			s_logger.error("failed", e);
+			LOGGER.error("failed", e);
 			notifyListeners(ChatEvent.newFailEvent(e.getMessage()));
 		} finally {
 			postProcessEvent();
@@ -138,18 +138,18 @@ public class ChatClient {
 	}
 
 	private void doHandleWrite(SelectionKey key) {
-		s_logger.info("handling write");
+		LOGGER.info("handling write");
 		
 		try {
-			synchronized(m_outputQueue) {
-				ByteBuffer buffer = m_outputQueue.peek();
+			synchronized(outputQueue) {
+				ByteBuffer buffer = outputQueue.peek();
 				// if(buffer == null) {
 				// return;
 				// }
 				((SocketChannel) key.channel()).write(buffer);
 				if(!buffer.hasRemaining()) {
-					s_logger.debug("write complete, removing from queue");
-					m_outputQueue.remove();
+					LOGGER.debug("write complete, removing from queue");
+					outputQueue.remove();
 					key.interestOps(SelectionKey.OP_READ);
 				}
 			}
@@ -159,7 +159,7 @@ public class ChatClient {
 	}
 
 	private void doHandleRead(SelectionKey key) {
-		s_logger.info("handling read");
+		LOGGER.info("handling read");
 		
 		SocketChannel channel = (SocketChannel) key.channel();
 		ByteBuffer buffer = ByteBuffer.allocate(1024);
@@ -176,7 +176,7 @@ public class ChatClient {
 		}
 		
 		if(nread == -1) {
-			s_logger.info("disconnected by the server...");
+			LOGGER.info("disconnected by the server...");
 			stop();
 		}
 		
@@ -193,7 +193,7 @@ public class ChatClient {
 	}
 
 	private void doHandleConnect(SelectionKey key) {
-		s_logger.info("handling connection...");
+		LOGGER.info("handling connection...");
 		
 		try {
 			((SocketChannel) key.channel()).finishConnect();
@@ -204,7 +204,7 @@ public class ChatClient {
 	}
 
 	private void notifyListeners(ChatEvent event) {
-		for(ChatListener listener : m_listeners) {
+		for(ChatListener listener : chatListeners) {
 			switch(event.getType()) {
 			case ON_CONNECT:
 				listener.onConnected();
@@ -220,22 +220,22 @@ public class ChatClient {
 	}
 
 	public void getChatRooms() {
-		s_logger.info("sending get rooms request");
+		LOGGER.info("sending get rooms request");
 		
 		RequestMessage request = RequestMessage.newBuilder()
 			.setType(Type.GET_ROOMS)
 			.build();
-		m_pendingRequests.put(nextRequestId(), request);
+		pendingRequests.put(nextRequestId(), request);
 		
 		ByteBuffer buffer = ByteBuffer.wrap(request.toByteArray());
-		synchronized(m_outputQueue) {
-			m_outputQueue.offer(buffer);
+		synchronized(outputQueue) {
+			outputQueue.offer(buffer);
 		}
 		
-		m_selector.wakeup();
+		selector.wakeup();
 	}
 
 	private synchronized int nextRequestId() {
-		return m_nextRequestId++;
+		return nextRequestId++;
 	}
 }

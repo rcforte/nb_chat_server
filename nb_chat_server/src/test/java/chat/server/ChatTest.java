@@ -1,24 +1,21 @@
 package chat.server;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import chat.server.ChatServer;
+import static org.junit.Assert.assertEquals;
 
 public class ChatTest {
-    private ExecutorService m_executor = Executors.newFixedThreadPool(2);
-    private ChatServer m_server;
-    private BlockingChatClient m_client;
-    private FakeChatListener m_clientListener;
+    private ExecutorService executorService = Executors.newFixedThreadPool(2);
+    private ChatServer chatServer;
+    private BlockingChatClient blockingChatClient;
+    private FakeChatListener fakeChatListener;
 
     @Before
     public void setUp() throws Exception, InterruptedException {
@@ -28,64 +25,48 @@ public class ChatTest {
 
     @After
     public void tearDown() {
-        m_client.stop();
-        m_server.stop();
+        blockingChatClient.stop();
+        chatServer.stop();
     }
 
-    private void startClient() {
-        m_clientListener = new FakeChatListener();
-        m_client = new BlockingChatClient();
-        m_client.addListener(m_clientListener);
-        m_executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                m_client.connect();
-            }
-        });
-        m_client.waitForResult();
-    }
-
-    private void startServer()
-            throws Exception, InterruptedException {
-        m_server = new ChatServer(9999);
-        m_executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    m_server.start();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        TimeUnit.SECONDS.sleep(1);
-    }
 
     @Test
     public void shouldConnect() {
-        assertEquals(FakeChatListener.ON_CONNECTED,
-                m_clientListener.getResult());
+        assertEquals(FakeChatListener.ON_CONNECTED, fakeChatListener.getResult());
     }
 
     @Test
     public void shouldFailConnectWhenServerIsStopped() {
-        m_client.stop();
-        m_server.stop();
+        blockingChatClient.stop();
+        chatServer.stop();
         try {
             TimeUnit.SECONDS.sleep(1);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         startClient();
-        assertEquals(FakeChatListener.ON_FAIL,
-                m_clientListener.getResult());
+        assertEquals(FakeChatListener.ON_FAIL, fakeChatListener.getResult());
     }
 
     @Test
     public void shouldGetRooms() {
-        m_client.getChatRooms();
-        m_client.waitForResult();
-        assertEquals(Arrays.asList("room1", "room2"),
-                m_clientListener.getResults());
+        blockingChatClient.getChatRooms();
+        blockingChatClient.waitForResult();
+        assertEquals(Arrays.asList("room1", "room2"), fakeChatListener.getResults());
     }
+
+    private void startClient() {
+        fakeChatListener = new FakeChatListener();
+        blockingChatClient = new BlockingChatClient();
+        blockingChatClient.addListener(fakeChatListener);
+        executorService.execute(() -> blockingChatClient.connect());
+        blockingChatClient.waitForResult();
+    }
+
+    private void startServer() throws Exception, InterruptedException {
+        chatServer = new ChatServer(9999);
+        chatServer.start();
+        TimeUnit.SECONDS.sleep(1);
+    }
+
 }

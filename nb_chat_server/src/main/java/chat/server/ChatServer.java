@@ -1,201 +1,282 @@
 package chat.server;
 
+import chat.message.Chat.RequestMessage;
+import chat.message.Chat.RequestMessage.Type;
+import chat.message.Chat.ResponseMessage;
+import chat.server.chat.ChatUser;
+import com.google.common.collect.Maps;
+import com.google.protobuf.InvalidProtocolBufferException;
+import org.apache.log4j.Logger;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import org.apache.log4j.Logger;
+import static chat.server.NetworkEventType.ACCEPT;
+import static chat.server.NetworkEventType.WRITE;
 
-
-import chat.message.Chat.RequestMessage;
-import chat.message.Chat.ResponseMessage;
-import chat.message.Chat.RequestMessage.Type;
-import chat.server.chat.ChatUser;
-
-import com.google.protobuf.InvalidProtocolBufferException;
-
-/** non blocking server */
+/**
+ * non blocking server
+ */
 public class ChatServer {
-	private static final Logger s_logger = Logger.getLogger(ChatServer.class);
-	
-	private final int m_port;
-	private final Selector m_selector;
-	private final Map<SocketChannel, ChatUser> m_userByChannel = new HashMap<>();
-	private final Queue<WriteTicket> m_outputQueue = new LinkedList<>();
-	private volatile boolean m_stop = false;
-	
-	public ChatServer(int port) throws Exception {
-		m_port = port;
-		m_selector = Selector.open();
-	}
+    private static final Logger logger = Logger.getLogger(ChatServer.class);
 
-	/** performs NIO plumbing */
-	public void start() throws Exception {
-		s_logger.info("starting server...");
-		
-		ServerSocketChannel channel = ServerSocketChannel.open();
-		channel.configureBlocking(false);
-		channel.register(m_selector, SelectionKey.OP_ACCEPT);
+    private final int port;
+    private final Map<SocketChannel, ChatUser> clients = new HashMap<>();
+    private final Map<SocketChannel, Queue<ByteBuffer>> writeQueues = Maps.newHashMap();
+    private final Queue<WriteTicket> outputQueue = new LinkedList<>();
+    private final SelectHandler handler = new SelectHandler(this);
 
-		ServerSocket server = channel.socket();
-		server.bind(new InetSocketAddress(m_port));
-		s_logger.info("server started on port " + m_port);
-		
-		for(;;) {
-			if(m_stop) {
-				break;
-			}
-		
-			if(!m_outputQueue.isEmpty()) {
-				for(WriteTicket ticket : m_outputQueue) {
-					ticket.setWriteInterest(m_selector);
-				}
-			}
-			
-			int n = m_selector.select();
-			if(n == 0) {
-				continue;
-			}
-			
-			Iterator<SelectionKey> it = m_selector.selectedKeys().iterator();
-			while(it.hasNext()) {
-				SelectionKey key = it.next();
-				it.remove();
-				
-				if(!key.isValid()) {
-					continue;
-				}
-				
-				if(key.isAcceptable()) {
-					handleAccept(key);
-				} else if(key.isReadable()) {
-					handleRead(key);
-				} else if(key.isWritable()) {
-					handleWrite(key);
-				}
-			}
-		}
+    private volatile boolean stopped = false;
 
-		// Close the server gracefully
-		try {
-			s_logger.info("stopping server...");
-			m_selector.close();
-			channel.close();
-			server.close();
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void stop() {
-		s_logger.info("requesting server stop...");
-		m_stop = true;
-		m_selector.wakeup();
-	}
-	
-	public void handleAccept(SelectionKey key) 
-		throws Exception 
-	{
-		s_logger.info("handling accept...");
-		SocketChannel channel = ((ServerSocketChannel) key.channel()).accept();
-		channel.configureBlocking(false);
-		channel.register(key.selector(), SelectionKey.OP_READ);
-		m_userByChannel.put(channel, new ChatUser());
-	}
-	
-	public void handleRead(SelectionKey key) 
-		throws Exception 
-	{
-		// Read incoming bytes
-		SocketChannel channel = (SocketChannel) key.channel();
-		ByteBuffer buffer = ByteBuffer.allocate(1024);
-		ByteArrayOutputStream requestBytes = new ByteArrayOutputStream();
-		int nread = 0;
-	
-		try {
-			while((nread = channel.read(buffer)) > 0) {
-				requestBytes.write(buffer.array(), 0, nread);
-				buffer.clear();
-			}
-		} catch(IOException e) {
-			nread = -1;
-		}
-		
-		if(nread == -1) {
-			handleDisconnect(key); // disconnected
-		}
-		
-		// Handle the request
-		byte[] dataBytes = requestBytes.toByteArray();
-		if(dataBytes.length > 0) {
-			try {
-				RequestMessage request = RequestMessage.parseFrom(dataBytes);
-				if(request.getType() == Type.GET_ROOMS) {
-					handleGetRooms(channel, request);
-				}
-			} catch(InvalidProtocolBufferException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+    private Selector selector;
+    private ServerSocketChannel serverSocketChannel;
 
-	public void handleWrite(SelectionKey key) 
-		throws Exception 
-	{
-		// Write to client
-		ByteBuffer buffer = m_outputQueue.peek().getBuffer();
-		((SocketChannel) key.channel()).write(buffer);
+    public ChatServer(int port) throws Exception {
+        this.port = port;
+    }
 
-		// If all is written, remove from queue
-		if(!buffer.hasRemaining()) {
-			m_outputQueue.remove();
-		}
-		
-		// If queue is empty, set read interest
-		if(m_outputQueue.isEmpty()) {
-			key.interestOps(SelectionKey.OP_READ);
-		}
-	}
+    /**
+     * performs NIO plumbing
+     */
+    public void start() throws Exception {
+        logger.info("starting server...");
 
-	public List<SocketChannel> getUserChannels() {
-		return new ArrayList<SocketChannel>(m_userByChannel.keySet());
-	}
-	
-	public ChatUser getUserByChannel(SocketChannel channel) {
-		return m_userByChannel.get(channel);
-	}
+        selector = Selector.open();
+        serverSocketChannel = ServerSocketChannel.open();
+        serverSocketChannel.configureBlocking(false);
+        serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+        serverSocketChannel.socket().bind(new InetSocketAddress(port));
 
-	private void handleDisconnect(SelectionKey key) {
-		// TODO: remove all info related to the channel
-		key.cancel();
-	}
+        logger.info("server started on port " + port);
 
-	private void handleGetRooms(SocketChannel channel, RequestMessage request) {
-		s_logger.info("handling get rooms request...");
-		
-		ResponseMessage response = ResponseMessage.newBuilder()
-			.addChatRoom("room1")
-			.addChatRoom("room2")
-			.build();
-		
-		// I need the channel to set write interest in the selection loop
-		m_outputQueue.offer(new WriteTicket(
-			channel, ByteBuffer.wrap(response.toByteArray())
-		));
-		
-		m_selector.wakeup();
-	}
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.submit(() -> {
+            startSelect();
+        });
+    }
+
+    void startSelect() {
+        while (!stopped) {
+            try {
+                select();
+            } catch (IOException e) {
+                logger.error("error during select operation", e);
+            }
+        }
+
+        logger.info("stopping server...");
+        try {
+            selector.close();
+        } catch (IOException e) {
+            logger.error("Error closing selector", e);
+        }
+        try {
+            for (SocketChannel socketChannel : clients.keySet()) {
+                socketChannel.close();
+            }
+        } catch (Exception e) {
+            logger.error("Error closing the clients", e);
+        }
+        try {
+            serverSocketChannel.close();
+        } catch (Exception e) {
+            logger.error("Error closing server channel", e);
+        }
+    }
+
+    void select() throws IOException {
+        if (!outputQueue.isEmpty()) {
+            for (WriteTicket ticket : outputQueue) {
+                ticket.setWriteInterest(selector);
+            }
+        }
+
+        int n = selector.select(1000L);
+        if (n == 0) {
+            return;
+        }
+
+        Iterator<SelectionKey> it = selector.selectedKeys().iterator();
+        while (it.hasNext()) {
+            SelectionKey key = it.next();
+
+            if (key.isValid() && key.isAcceptable()) {
+                handler.handleAccept(key);
+            } else if (key.isValid() && key.isReadable()) {
+                handler.handleRead(key);
+            } else if (key.isValid() && key.isWritable()) {
+                handler.handleWrite(key);
+            }
+
+            it.remove();
+        }
+    }
+
+    public void stop() {
+        logger.info("requesting server stop...");
+        this.stopped = true;
+        this.selector.wakeup();
+    }
+
+
+    public List<SocketChannel> getUserChannels() {
+        return new ArrayList<SocketChannel>(clients.keySet());
+    }
+
+    public ChatUser getUserByChannel(SocketChannel channel) {
+        return clients.get(channel);
+    }
+
+    void handleEvent(NetworkEvent networkEvent) throws IOException {
+        if (networkEvent.getType() == ACCEPT) {
+            SocketChannel socketChannel = networkEvent.getSocketChannel();
+            clients.put(socketChannel, new ChatUser());
+        } else if (networkEvent.getType() == NetworkEventType.DISCONNECT) {
+            SocketChannel socketChannel = networkEvent.getSocketChannel();
+            socketChannel.close();
+            SelectionKey selectionKey = socketChannel.keyFor(selector);
+            selectionKey.cancel();
+            clients.remove(socketChannel);
+        } else if (networkEvent.getType() == NetworkEventType.READ) {
+            try {
+                SocketChannel socketChannel = networkEvent.getSocketChannel();
+                byte[] data = networkEvent.getData();
+                RequestMessage request = RequestMessage.parseFrom(data);
+                if (request.getType() == Type.GET_ROOMS) {
+                    logger.info("handling get rooms request...");
+                    ResponseMessage response = ResponseMessage.newBuilder()
+                            .addChatRoom("room1")
+                            .addChatRoom("room2")
+                            .build();
+                    outputQueue.offer(new WriteTicket(socketChannel, ByteBuffer.wrap(response.toByteArray())));
+                    selector.wakeup();
+                }
+            } catch (InvalidProtocolBufferException e) {
+                logger.error("Error reading from client", e);
+            }
+        } else if (networkEvent.getType() == WRITE) {
+            // Get write queue for channel
+            SocketChannel socketChannel = networkEvent.getSocketChannel();
+            Queue<ByteBuffer> queue = writeQueues.get(socketChannel);
+            // Write first buffer in the queue
+            ByteBuffer byteBuffer = queue.peek();
+            socketChannel.write(byteBuffer);
+            if (byteBuffer.hasRemaining()) {
+                // still has bytes, compact buffer for next time
+                byteBuffer.compact();
+            } else {
+                // all bytes written, get rid of buffer
+                queue.poll();
+            }
+            if (queue.isEmpty()) {
+                // nothing else to write, go back to read mode
+                socketChannel.keyFor(selector).interestOps(SelectionKey.OP_READ);
+            }
+        }
+    }
+}
+
+class SelectHandler {
+    private static final Logger logger = Logger.getLogger(Handler.class);
+    private final ChatServer chatServer;
+
+    public SelectHandler(ChatServer chatServer) {
+        this.chatServer = chatServer;
+    }
+
+    public void handleAccept(SelectionKey key) throws IOException {
+        logger.info("handling accept...");
+        ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
+        SocketChannel socketChannel = serverSocketChannel.accept();
+        socketChannel.configureBlocking(false);
+        socketChannel.register(key.selector(), SelectionKey.OP_READ);
+
+        NetworkEvent networkEvent = new NetworkEvent();
+        networkEvent.setType(ACCEPT);
+        networkEvent.setSocketChannel(socketChannel);
+
+        chatServer.handleEvent(networkEvent);
+    }
+
+    public void handleRead(SelectionKey key) throws IOException {
+        SocketChannel socketChannel = (SocketChannel) key.channel();
+        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+        ByteArrayOutputStream requestBytes = new ByteArrayOutputStream();
+        int n = 0;
+
+        try {
+            while ((n = socketChannel.read(byteBuffer)) > 0) {
+                byte[] bytes = new byte[n];
+                byteBuffer.flip();
+                byteBuffer.get(bytes);
+                byteBuffer.compact();
+                requestBytes.write(bytes);
+            }
+        } catch (IOException e) {
+            n = -1;
+        }
+
+        if (n == -1) {
+            NetworkEvent networkEvent = new NetworkEvent();
+            networkEvent.setType(NetworkEventType.DISCONNECT);
+            networkEvent.setSocketChannel(socketChannel);
+            chatServer.handleEvent(networkEvent);
+        } else {
+            NetworkEvent networkEvent = new NetworkEvent();
+            networkEvent.setType(NetworkEventType.READ);
+            networkEvent.setSocketChannel(socketChannel);
+            networkEvent.setData(requestBytes.toByteArray());
+            chatServer.handleEvent(networkEvent);
+        }
+    }
+
+    public void handleWrite(SelectionKey key) throws IOException {
+        NetworkEvent networkEvent = new NetworkEvent();
+        networkEvent.setType(WRITE);
+        networkEvent.setSocketChannel((SocketChannel) key.channel());
+        chatServer.handleEvent(networkEvent);
+    }
+}
+
+class NetworkEvent {
+    private NetworkEventType type;
+    private SocketChannel socketChannel;
+    private byte[] data;
+
+    public NetworkEventType getType() {
+        return type;
+    }
+
+    public void setType(NetworkEventType type) {
+        this.type = type;
+    }
+
+    public SocketChannel getSocketChannel() {
+        return socketChannel;
+    }
+
+    public void setSocketChannel(SocketChannel socketChannel) {
+        this.socketChannel = socketChannel;
+    }
+
+    public byte[] getData() {
+        return data;
+    }
+
+    public void setData(byte[] data) {
+        this.data = data;
+    }
+}
+
+enum NetworkEventType {
+    DISCONNECT, READ, WRITE, ACCEPT;
 }
