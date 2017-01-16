@@ -1,6 +1,7 @@
 package chat.client;
 
 import chat.common.RequestMessage;
+import chat.common.RequestMessageType;
 import chat.common.ResponseMessage;
 import chat.server.NetworkEvent;
 import chat.server.NetworkEventType;
@@ -18,6 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static chat.common.RequestMessageType.GET_ROOMS;
+import static chat.common.RequestMessageType.GET_ROOM_USERS;
 import static com.google.common.base.Preconditions.checkArgument;
 
 public class ChatClient {
@@ -63,6 +65,25 @@ public class ChatClient {
 		String correlationId = UUID.randomUUID().toString();
 		RequestMessage requestMessage = new RequestMessage();
 		requestMessage.setRequestMessageType(GET_ROOMS);
+		requestMessage.setCorrelationId(correlationId);
+
+		processors.put(correlationId, processor);
+
+		String json = requestMessage.toJson();
+		byte[] jsonBytes = json.getBytes();
+		network.send(this.socketChannel, jsonBytes);
+	}
+
+	public void getChatRoomUsers(String chatRoom, Processor processor) {
+		logger.info("sending get rooms requestMessage");
+
+
+		String correlationId = UUID.randomUUID().toString();
+		RequestMessage requestMessage = new RequestMessage();
+		requestMessage.setRequestMessageType(GET_ROOM_USERS);
+		Map<String, String> payload = Maps.newHashMap();
+		payload.put("chatRoom", chatRoom);
+		requestMessage.setPayload(payload);
 		requestMessage.setCorrelationId(correlationId);
 
 		processors.put(correlationId, processor);
