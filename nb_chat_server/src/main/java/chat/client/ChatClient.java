@@ -1,13 +1,11 @@
 package chat.client;
 
 import chat.common.RequestMessage;
-import chat.common.RequestMessageType;
 import chat.common.ResponseMessage;
-import chat.server.NetworkEvent;
-import chat.server.NetworkEventType;
-import chat.server.NetworkListener;
-import chat.server.NonBlockingNetwork;
-import com.google.common.base.Preconditions;
+import network.NetworkEvent;
+import network.NetworkEventType;
+import network.NetworkListener;
+import network.NonBlockingNetwork;
 import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 

@@ -1,4 +1,4 @@
-package chat.server;
+package network;
 
 import java.nio.channels.SocketChannel;
 

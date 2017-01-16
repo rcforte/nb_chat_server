@@ -1,6 +1,5 @@
-package chat.server;
+package network;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
@@ -8,19 +7,18 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static chat.server.NetworkEventType.*;
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
@@ -29,18 +27,53 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class NonBlockingNetwork {
     private static final Logger logger = Logger.getLogger(NonBlockingNetwork.class);
 
-    private final Map<SocketChannel, Queue<ByteBuffer>> writeQueues = Maps.newConcurrentMap();
-    private final SelectHandler handler = new SelectHandler(this);
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final List<NetworkListener> networkListeners = Lists.newCopyOnWriteArrayList();
-    private volatile boolean stopped;
+    private final Map<SocketChannel, Queue<ByteBuffer>> writeQueues = Maps.newConcurrentMap();
+    private final SelectorHandler handler = new SelectorHandler(this);
+    private final SelectorListener selectorListener = new SelectorListener() {
+        @Override
+        public void onClosed() {
+            try {
+                for (SocketChannel socketChannel : writeQueues.keySet()) {
+                    socketChannel.close();
+                }
+            } catch (Exception e) {
+                logger.error("Error closing the writeQueues", e);
+            }
+
+            if (serverSocketChannel != null) {
+                try {
+                    serverSocketChannel.close();
+                } catch (Exception e) {
+                    logger.error("Error closing server channel", e);
+                }
+            }
+        }
+
+        @Override
+        public void onBeforeSelect() {
+            for (Map.Entry<SocketChannel, Queue<ByteBuffer>> entry : writeQueues.entrySet()) {
+                Queue<ByteBuffer> queue = entry.getValue();
+                if (!queue.isEmpty()) {
+                    SocketChannel socketChannel = entry.getKey();
+                    socketChannel.keyFor(selector).interestOps(SelectionKey.OP_WRITE);
+                }
+            }
+        }
+    };
 
     private Selector selector;
+    private SelectorLoop selectorLoop;
     private ServerSocketChannel serverSocketChannel;
 
     public void bind(int port) throws IOException {
+        checkArgument(port >= 0, "port cannot be negative");
+
         logger.info("starting server...");
 
         selector = Selector.open();
+        selectorLoop = new SelectorLoop(selector, selectorListener, handler);
         serverSocketChannel = ServerSocketChannel.open();
         serverSocketChannel.configureBlocking(false);
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
@@ -48,39 +81,52 @@ public class NonBlockingNetwork {
 
         logger.info("server started on port " + port);
 
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(() -> {
-            startSelect();
+            selectorLoop.start();
         });
     }
 
     public void connect(String host, int port) throws IOException {
+        checkArgument(host != null, "host cannot be null");
+        checkArgument(port >= 0, "port cannot be negative");
+
         logger.info("connecting to server...");
 
         selector = Selector.open();
+        selectorLoop = new SelectorLoop(selector, selectorListener, handler);
         SocketChannel socketChannel = SocketChannel.open();
         socketChannel.configureBlocking(false);
         socketChannel.register(selector, SelectionKey.OP_CONNECT);
         socketChannel.connect(new InetSocketAddress(host, port));
 
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        logger.info("connected to " + host + ":" + port);
+
         executorService.execute(() -> {
-            startSelect();
+            selectorLoop.start();
         });
     }
 
     public void stop() {
         logger.info("requesting stop...");
-        this.stopped = true;
-        this.selector.wakeup();
+        selectorLoop.stop();
     }
 
     public void addNetworkListener(NetworkListener networkListener) {
+        checkArgument(networkListener != null, "networkListener cannot be null");
         networkListeners.add(networkListener);
     }
 
     public void removeNetworkListener(NetworkListener networkListener) {
+        checkArgument(networkListener != null, "networkListener cannot be null");
         networkListeners.remove(networkListener);
+    }
+
+    void notifyListeners(NetworkEvent networkEvent) {
+        checkArgument(networkEvent != null, "networkEvent cannot be null");
+
+        for (NetworkListener networkListener : networkListeners) {
+            networkListener.onEvent(networkEvent);
+        }
     }
 
     public void send(SocketChannel socketChannel, byte[] data) {
@@ -89,85 +135,28 @@ public class NonBlockingNetwork {
 
         Queue<ByteBuffer> queue = writeQueues.get(socketChannel);
         queue.add(ByteBuffer.wrap(data));
-        selector.wakeup();
     }
 
     public void broadcast(byte[] data) {
+        checkArgument(data != null, "data cannot be null");
+        checkArgument(data.length > 0, "data cannot be empty");
+
         for (SocketChannel socketChannel : writeQueues.keySet()) {
             send(socketChannel, data);
         }
     }
 
-    void startSelect() {
-        while (!stopped) {
-            try {
-                select();
-            } catch (IOException e) {
-                logger.error("error during select operation", e);
-            }
-        }
-
-        logger.info("stopping network...");
-        try {
-            selector.close();
-        } catch (IOException e) {
-            logger.error("Error closing selector", e);
-        }
-        try {
-            for (SocketChannel socketChannel : writeQueues.keySet()) {
-                socketChannel.close();
-            }
-        } catch (Exception e) {
-            logger.error("Error closing the writeQueues", e);
-        }
-        if (serverSocketChannel != null) {
-            try {
-                serverSocketChannel.close();
-            } catch (Exception e) {
-                logger.error("Error closing server channel", e);
-            }
-        }
-    }
-
-    void select() throws IOException {
-        for (Map.Entry<SocketChannel, Queue<ByteBuffer>> entry : writeQueues.entrySet()) {
-            Queue<ByteBuffer> queue = entry.getValue();
-            if (!queue.isEmpty()) {
-                SocketChannel socketChannel = entry.getKey();
-                socketChannel.keyFor(selector).interestOps(SelectionKey.OP_WRITE);
-            }
-        }
-
-        int n = selector.select(1000L);
-        if (n == 0) {
-            return;
-        }
-
-        Iterator<SelectionKey> it = selector.selectedKeys().iterator();
-        while (it.hasNext()) {
-            SelectionKey key = it.next();
-
-            if (key.isValid() && key.isAcceptable()) {
-                handler.handleAccept(key);
-            } else if (key.isValid() && key.isConnectable()) {
-                handler.handleConnect(key);
-            } else if (key.isValid() && key.isReadable()) {
-                handler.handleRead(key);
-            } else if (key.isValid() && key.isWritable()) {
-                handler.handleWrite(key);
-            }
-
-            it.remove();
-        }
+    void addSocket(SocketChannel socketChannel) {
+        writeQueues.put(socketChannel, Queues.newArrayDeque());
     }
 
     void handleEvent(NetworkEvent networkEvent) throws IOException {
-        if (networkEvent.getType() == ACCEPT) {
-            SocketChannel socketChannel = networkEvent.getSocketChannel();
-            writeQueues.put(socketChannel, Queues.newArrayDeque());
-        } else if (networkEvent.getType() == CONNECT) {
-            SocketChannel socketChannel = networkEvent.getSocketChannel();
-            writeQueues.put(socketChannel, Queues.newArrayDeque());
+        checkArgument(networkEvent != null, "networkEvent cannot be null");
+
+        if (networkEvent.getType() == NetworkEventType.ACCEPT) {
+            addSocket(networkEvent.getSocketChannel());
+        } else if (networkEvent.getType() == NetworkEventType.CONNECT) {
+            addSocket(networkEvent.getSocketChannel());
         } else if (networkEvent.getType() == NetworkEventType.DISCONNECT) {
             SocketChannel socketChannel = networkEvent.getSocketChannel();
             socketChannel.close();
@@ -178,7 +167,7 @@ public class NonBlockingNetwork {
             //
             // Do nothing
             //
-        } else if (networkEvent.getType() == WRITE) {
+        } else if (networkEvent.getType() == NetworkEventType.WRITE) {
             // Get write queue for channel
             SocketChannel socketChannel = networkEvent.getSocketChannel();
             Queue<ByteBuffer> queue = writeQueues.get(socketChannel);
@@ -200,12 +189,5 @@ public class NonBlockingNetwork {
 
         notifyListeners(networkEvent);
     }
-
-    void notifyListeners(NetworkEvent networkEvent) {
-        for (NetworkListener networkListener : networkListeners) {
-            networkListener.onEvent(networkEvent);
-        }
-    }
-
 }
 

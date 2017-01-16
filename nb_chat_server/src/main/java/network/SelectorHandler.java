@@ -1,4 +1,4 @@
-package chat.server;
+package network;
 
 import org.apache.log4j.Logger;
 
@@ -9,18 +9,14 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
-import static chat.server.NetworkEventType.ACCEPT;
-import static chat.server.NetworkEventType.CONNECT;
-import static chat.server.NetworkEventType.WRITE;
-
 /**
  * Created by Rafael on 1/15/2017.
  */
-class SelectHandler implements Handler {
-    private static final Logger logger = Logger.getLogger(SelectHandler.class);
+class SelectorHandler implements Handler {
+    private static final Logger logger = Logger.getLogger(SelectorHandler.class);
     private final NonBlockingNetwork network;
 
-    public SelectHandler(NonBlockingNetwork network) {
+    public SelectorHandler(NonBlockingNetwork network) {
         this.network = network;
     }
 
@@ -33,7 +29,7 @@ class SelectHandler implements Handler {
         socketChannel.register(key.selector(), SelectionKey.OP_READ);
 
         NetworkEvent networkEvent = new NetworkEvent();
-        networkEvent.setType(ACCEPT);
+        networkEvent.setType(NetworkEventType.ACCEPT);
         networkEvent.setSocketChannel(socketChannel);
 
         network.handleEvent(networkEvent);
@@ -44,9 +40,10 @@ class SelectHandler implements Handler {
 
         SocketChannel socketChannel = (SocketChannel) key.channel();
         socketChannel.finishConnect();
+        key.interestOps(SelectionKey.OP_READ);
 
         NetworkEvent networkEvent = new NetworkEvent();
-        networkEvent.setType(CONNECT);
+        networkEvent.setType(NetworkEventType.CONNECT);
         networkEvent.setSocketChannel(socketChannel);
 
         network.handleEvent(networkEvent);
@@ -73,6 +70,7 @@ class SelectHandler implements Handler {
         }
 
         if (n == -1) {
+            logger.info("disconnected by the client...");
             NetworkEvent networkEvent = new NetworkEvent();
             networkEvent.setType(NetworkEventType.DISCONNECT);
             networkEvent.setSocketChannel(socketChannel);
@@ -90,7 +88,7 @@ class SelectHandler implements Handler {
         logger.info("handling write...");
 
         NetworkEvent networkEvent = new NetworkEvent();
-        networkEvent.setType(WRITE);
+        networkEvent.setType(NetworkEventType.WRITE);
         networkEvent.setSocketChannel((SocketChannel) key.channel());
         network.handleEvent(networkEvent);
     }

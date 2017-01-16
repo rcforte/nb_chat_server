@@ -1,4 +1,4 @@
-package chat.server;
+package network;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
