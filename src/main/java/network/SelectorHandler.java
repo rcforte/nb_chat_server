@@ -20,15 +20,12 @@ class SelectorHandler implements Handler {
 
     public void handleAccept(SelectionKey key) throws IOException {
         logger.info("handling accept...");
-
         ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
         SocketChannel socketChannel = network.accept(serverSocketChannel);
-
         NetworkEvent networkEvent = new NetworkEvent();
         networkEvent.setNetwork(network);
         networkEvent.setType(NetworkEventType.ACCEPT);
         networkEvent.setSocketChannel(socketChannel);
-
         network.handleEvent(networkEvent);
     }
 
@@ -53,7 +50,7 @@ class SelectorHandler implements Handler {
         byte[] bytes = network.receiveBytes(socketChannel);
 
         if (bytes == null) {
-            logger.info("disconnected by the client...");
+            logger.info("disconnected by the chat.client...");
 
             NetworkEvent networkEvent = new NetworkEvent();
             networkEvent.setNetwork(network);

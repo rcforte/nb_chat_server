@@ -2,7 +2,6 @@ package chat.gui;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
 
 /**
  * Created by Rafael on 1/15/2017.

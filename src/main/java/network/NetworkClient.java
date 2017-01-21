@@ -43,7 +43,7 @@ class NetworkClient {
     public void send(byte[] data) {
         checkArgument(data != null, "data cannot be null");
         checkArgument(data.length > 0, "data cannot be empty");
-        checkNotNull(socketChannel, "client not connected");
+        checkNotNull(socketChannel, "chat.client not connected");
 
         this.network.send(socketChannel, data);
     }

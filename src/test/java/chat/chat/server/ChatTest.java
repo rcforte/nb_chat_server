@@ -1,14 +1,14 @@
-package chat.server;
+package chat.chat.server;
 
 import chat.client.ChatClient;
 import chat.common.RequestMessage;
 import chat.common.ResponseMessage;
 import com.google.common.collect.Lists;
+import network.chat.ChatServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;

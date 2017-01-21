@@ -1,4 +1,4 @@
-package network;
+package network.echo;
 
 import network.echo.EchoClient;
 import network.echo.EchoServer;
@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Created by Rafael on 1/16/2017.
  */
-public class NetworkFunctionalTest {
+public class EchoServerTest {
 
     @Test
     public void test() throws Exception {

@@ -1,4 +1,4 @@
-package chat.server;
+package network.chat;
 
 import chat.common.RequestMessage;
 import chat.common.RequestMessageType;

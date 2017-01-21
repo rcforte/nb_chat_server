@@ -52,7 +52,7 @@ public class ChatClient {
 	}
 
 	public void stop() {
-		logger.info("stopping client...");
+		logger.info("stopping chat.client...");
 		network.stop();
 		network.removeNetworkListener(networkListener);
 	}

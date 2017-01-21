@@ -1,4 +1,4 @@
-package chat.server.chat;
+package network.chat;
 
 public class ChatUser {
 	private String m_name;
