@@ -1,0 +1,4 @@
+chat\server\ChatTest.class
+network\NetworkClientTest.class
+network\NetworkFunctionalTest.class
+network\NetworkServerTest.class
