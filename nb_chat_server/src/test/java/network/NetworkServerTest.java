@@ -1,12 +1,14 @@
 package network;
 
+import com.google.common.collect.Lists;
+import network.echo.EchoService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.nio.channels.SocketChannel;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
@@ -18,7 +20,6 @@ import static org.junit.Assert.assertNotNull;
  * Created by Rafael on 1/16/2017.
  */
 public class NetworkServerTest {
-
     NonBlockingNetwork server;
 
     @Before
@@ -35,12 +36,13 @@ public class NetworkServerTest {
 
     @Test
     public void serverAcceptsConnections() throws Exception {
-
         BlockingQueue<NetworkEvent> blockingQueue = new LinkedBlockingDeque<>();
         server.addNetworkListener(networkEvent -> blockingQueue.add(networkEvent));
 
+        List<Socket> sockets = Lists.newArrayList();
         for (int i = 0; i < 1000; i++) {
             Socket socket = new Socket("localhost", 9999);
+            sockets.add(socket); // avoids being collected
 
             NetworkEvent networkEvent = blockingQueue.poll(1, TimeUnit.SECONDS);
             assertNotNull(networkEvent);
@@ -51,28 +53,27 @@ public class NetworkServerTest {
 
     @Test
     public void serverRespondsToClients() throws Exception {
+        String sentMessage = "Sample message";
+        MessageEncoder<String> encoder = new TokenMessageEncoder("\n");
+        server.addNetworkListener(new EchoService(encoder));
 
-        server.addNetworkListener(networkEvent -> {
-            if (networkEvent.getType() == NetworkEventType.READ) {
-                SocketChannel socketChannel = networkEvent.getSocketChannel();
-                byte[] data = networkEvent.getData();
-                server.send(socketChannel, data);
-            }
-        });
-
+        List<Socket> sockets = Lists.newArrayList();
         for (int i = 0; i < 1000; i++) {
-            byte[] bytes = new byte[100];
             Socket socket = new Socket("localhost", 9999);
-            socket.getOutputStream().write("Sample message".getBytes());
-            int n = socket.getInputStream().read(bytes);
+            socket.getOutputStream().write(encoder.encode(sentMessage));
+            sockets.add(socket); // avoids being collected
 
-            assertEquals("Sample message", new String(bytes, 0, n));
+            byte[] bytes = new byte[100];
+            int n = socket.getInputStream().read(bytes);
+            bytes = new String(bytes, 0, n).getBytes();
+            String receivedMessage = encoder.decode(bytes).get(0);
+
+            assertEquals(sentMessage, receivedMessage);
         }
     }
 
     @Test
     public void serverAcceptsClientsClose() throws Exception {
-
         BlockingQueue<NetworkEvent> blockingQueue = new LinkedBlockingDeque<>();
         server.addNetworkListener(networkEvent -> {
             if (networkEvent.getType() == NetworkEventType.DISCONNECT) {

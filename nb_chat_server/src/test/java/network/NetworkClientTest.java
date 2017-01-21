@@ -1,12 +1,12 @@
 package network;
 
 import com.google.common.collect.Lists;
+import network.echo.EchoService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.nio.channels.SocketChannel;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -16,19 +16,21 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by Rafael on 1/16/2017.
  */
 public class NetworkClientTest {
-
     NonBlockingNetwork server;
 
     @Before
     public void setup() throws IOException {
+        EchoService echoService =
+                new EchoService(new TokenMessageEncoder("\n"));
+
         server = new NonBlockingNetwork();
-        EchoNetworkListener networkListener = new EchoNetworkListener(server);
-        server.addNetworkListener(networkListener);
+        server.addNetworkListener(echoService);
         server.bind(9999);
     }
 
@@ -41,6 +43,7 @@ public class NetworkClientTest {
     @Test
     public void receivesResponseUsingListener() throws Exception {
         BlockingQueue<NetworkEvent> blockingQueue = new LinkedBlockingDeque<>();
+        TokenMessageEncoder encoder = new TokenMessageEncoder("\n");
         NetworkClient networkClient = new NetworkClient(new NonBlockingNetwork());
         networkClient.addNetworkListener(networkEvent -> {
             if (networkEvent.getType() == NetworkEventType.READ) {
@@ -49,93 +52,44 @@ public class NetworkClientTest {
         });
         networkClient.connect("localhost", 9999);
         Thread.sleep(1000);
-        networkClient.send("This is a test".getBytes());
+
+        networkClient.send(encoder.encode("This is a test"));
 
         NetworkEvent networkEvent = blockingQueue.poll(1, TimeUnit.SECONDS);
-
         assertNotNull(networkEvent);
         assertEquals(NetworkEventType.READ, networkEvent.getType());
-        assertEquals("This is a test", new String(networkEvent.getData()));
+        assertEquals("This is a test", encoder.decode(networkEvent.getData()).get(0));
     }
 
     @Test
     public void receivesMessage() throws Exception {
-
-        class MessageReceiver implements NetworkListener {
-
-            public void onEvent(NetworkEvent networkEvent) {
-
-                if (networkEvent.getType() == NetworkEventType.READ) {
-
-                    // receive bytes
-                    // add to accumulator
-                    // make string from bytes
-                    // split string by separator
-                    // try to parse message with bytes in accumulator
-                }
-            }
-        }
-
         BlockingQueue<NetworkEvent> blockingQueue = new LinkedBlockingDeque<>();
-        NetworkClient networkClient = new NetworkClient(new NonBlockingNetwork());
-        networkClient.addNetworkListener(networkEvent -> {
+        NetworkListener networkListener = networkEvent -> {
             if (networkEvent.getType() == NetworkEventType.READ) {
                 blockingQueue.add(networkEvent);
             }
-        });
+        };
+        TokenMessageEncoder encoder = new TokenMessageEncoder("\n");
+        List<String> sent = Lists.newArrayList("Message1", "Message2", "Message3");
+
+        NetworkClient networkClient = new NetworkClient(new NonBlockingNetwork());
+        networkClient.addNetworkListener(networkListener);
         networkClient.connect("localhost", 9999);
         Thread.sleep(1000);
 
-        int messageCount = 3;
-        for (int i = 0; i < messageCount; i++) {
+        sent.stream().forEach(message ->
+                server.broadcast(encoder.encode(message))
+        );
 
-            server.broadcast(String.format("Message %d", i).getBytes());
-        }
-
-        for (int i = 0; i < messageCount; i++) {
-
+        List<String> received = Lists.newArrayList();
+        while (received.size() != 3) {
             NetworkEvent networkEvent = blockingQueue.poll(1, TimeUnit.SECONDS);
             assertNotNull(networkEvent);
             assertEquals(NetworkEventType.READ, networkEvent.getType());
-            assertEquals(String.format("Message %d", i), new String(networkEvent.getData()));
+            received.addAll(encoder.decode(networkEvent.getData()));
         }
+
+        assertEquals("Wrong messages received from server", sent, received);
     }
 }
 
-class NetworkClient {
-
-    private final List<NetworkListener> networkListeners = Lists.newCopyOnWriteArrayList();
-    private final NonBlockingNetwork network;
-    private final NetworkListener networkListener = networkEvent -> {
-        if (networkEvent.getType() == NetworkEventType.CONNECT) {
-            socketChannel = networkEvent.getSocketChannel();
-        }
-    };
-
-    private SocketChannel socketChannel;
-
-    public NetworkClient(NonBlockingNetwork network) {
-        this.network = network;
-        this.network.addNetworkListener(networkListener);
-    }
-
-    public void addNetworkListener(NetworkListener networkListener) {
-        this.network.addNetworkListener(networkListener);
-    }
-
-    public void removeNetworkListener(NetworkListener networkListener) {
-        this.network.removeNetworkListener(networkListener);
-    }
-
-    public void connect(String host, int port) throws IOException {
-        this.network.connect(host, port);
-    }
-
-    public void send(byte[] data) {
-        checkArgument(data != null, "data cannot be null");
-        checkArgument(data.length > 0, "data cannot be empty");
-        checkNotNull(socketChannel, "client not connected");
-
-        this.network.send(socketChannel, data);
-    }
-}

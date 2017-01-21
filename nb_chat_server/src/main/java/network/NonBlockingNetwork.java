@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import org.apache.log4j.Logger;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -159,35 +160,73 @@ public class NonBlockingNetwork {
             addSocket(networkEvent.getSocketChannel());
         } else if (networkEvent.getType() == NetworkEventType.DISCONNECT) {
             SocketChannel socketChannel = networkEvent.getSocketChannel();
-            socketChannel.close();
             SelectionKey selectionKey = socketChannel.keyFor(selector);
             selectionKey.cancel();
+            socketChannel.close();
             writeQueues.remove(socketChannel);
         } else if (networkEvent.getType() == NetworkEventType.READ) {
             //
             // Do nothing
             //
         } else if (networkEvent.getType() == NetworkEventType.WRITE) {
-            // Get write queue for channel
-            SocketChannel socketChannel = networkEvent.getSocketChannel();
-            Queue<ByteBuffer> queue = writeQueues.get(socketChannel);
-            // Write first buffer in the queue
-            ByteBuffer byteBuffer = queue.peek();
-            socketChannel.write(byteBuffer);
-            if (byteBuffer.hasRemaining()) {
-                // still has bytes, compact buffer for next time
-                byteBuffer.compact();
-            } else {
-                // all bytes written, get rid of buffer
-                queue.remove();
-            }
-            if (queue.isEmpty()) {
-                // nothing else to write, go back to read mode
-                socketChannel.keyFor(selector).interestOps(SelectionKey.OP_READ);
-            }
+            //
+            // Do nothing
+            //
         }
 
         notifyListeners(networkEvent);
+    }
+
+    public void sendBytes(SocketChannel socketChannel) throws IOException {
+        Queue<ByteBuffer> queue = writeQueues.get(socketChannel);
+        ByteBuffer byteBuffer = queue.peek();
+        socketChannel.write(byteBuffer);
+        if (byteBuffer.hasRemaining()) {
+            byteBuffer.compact();
+        } else {
+            queue.remove();
+        }
+        if (queue.isEmpty()) {
+            socketChannel.keyFor(selector).interestOps(SelectionKey.OP_READ);
+        }
+    }
+
+    public byte[] receiveBytes(SocketChannel socketChannel) {
+        int n = 0;
+        byte[] result = null;
+
+        try {
+            ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            while ((n = socketChannel.read(byteBuffer)) > 0) {
+                byte[] bytes = new byte[n];
+                byteBuffer.flip();
+                byteBuffer.get(bytes);
+                byteBuffer.compact();
+                byteStream.write(bytes);
+            }
+            result = byteStream.toByteArray();
+        } catch (IOException e) {
+            n = -1;
+        }
+
+        if (n == -1) {
+            result = null;
+        }
+
+        return result;
+    }
+
+    public SocketChannel accept(ServerSocketChannel serverSocketChannel) throws IOException {
+        SocketChannel socketChannel = serverSocketChannel.accept();
+        socketChannel.configureBlocking(false);
+        socketChannel.register(selector, SelectionKey.OP_READ);
+        return socketChannel;
+    }
+
+    public void connect(SocketChannel socketChannel) throws IOException {
+        socketChannel.finishConnect();
+        socketChannel.keyFor(selector).interestOps(SelectionKey.OP_READ);
     }
 }
 

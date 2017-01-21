@@ -2,9 +2,7 @@ package network;
 
 import org.apache.log4j.Logger;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -24,11 +22,10 @@ class SelectorHandler implements Handler {
         logger.info("handling accept...");
 
         ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
-        SocketChannel socketChannel = serverSocketChannel.accept();
-        socketChannel.configureBlocking(false);
-        socketChannel.register(key.selector(), SelectionKey.OP_READ);
+        SocketChannel socketChannel = network.accept(serverSocketChannel);
 
         NetworkEvent networkEvent = new NetworkEvent();
+        networkEvent.setNetwork(network);
         networkEvent.setType(NetworkEventType.ACCEPT);
         networkEvent.setSocketChannel(socketChannel);
 
@@ -39,10 +36,10 @@ class SelectorHandler implements Handler {
         logger.info("handling connect...");
 
         SocketChannel socketChannel = (SocketChannel) key.channel();
-        socketChannel.finishConnect();
-        key.interestOps(SelectionKey.OP_READ);
+        network.connect(socketChannel);
 
         NetworkEvent networkEvent = new NetworkEvent();
+        networkEvent.setNetwork(network);
         networkEvent.setType(NetworkEventType.CONNECT);
         networkEvent.setSocketChannel(socketChannel);
 
@@ -53,33 +50,24 @@ class SelectorHandler implements Handler {
         logger.info("handling read...");
 
         SocketChannel socketChannel = (SocketChannel) key.channel();
-        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
-        ByteArrayOutputStream requestBytes = new ByteArrayOutputStream();
-        int n = 0;
+        byte[] bytes = network.receiveBytes(socketChannel);
 
-        try {
-            while ((n = socketChannel.read(byteBuffer)) > 0) {
-                byte[] bytes = new byte[n];
-                byteBuffer.flip();
-                byteBuffer.get(bytes);
-                byteBuffer.compact();
-                requestBytes.write(bytes);
-            }
-        } catch (IOException e) {
-            n = -1;
-        }
-
-        if (n == -1) {
+        if (bytes == null) {
             logger.info("disconnected by the client...");
+
             NetworkEvent networkEvent = new NetworkEvent();
+            networkEvent.setNetwork(network);
             networkEvent.setType(NetworkEventType.DISCONNECT);
             networkEvent.setSocketChannel(socketChannel);
+
             network.handleEvent(networkEvent);
         } else {
             NetworkEvent networkEvent = new NetworkEvent();
+            networkEvent.setNetwork(network);
             networkEvent.setType(NetworkEventType.READ);
             networkEvent.setSocketChannel(socketChannel);
-            networkEvent.setData(requestBytes.toByteArray());
+            networkEvent.setData(bytes);
+
             network.handleEvent(networkEvent);
         }
     }
@@ -87,9 +75,12 @@ class SelectorHandler implements Handler {
     public void handleWrite(SelectionKey key) throws IOException {
         logger.info("handling write...");
 
+        SocketChannel socketChannel = (SocketChannel) key.channel();
+        network.sendBytes(socketChannel);
+
         NetworkEvent networkEvent = new NetworkEvent();
         networkEvent.setType(NetworkEventType.WRITE);
-        networkEvent.setSocketChannel((SocketChannel) key.channel());
+        networkEvent.setSocketChannel(socketChannel);
         network.handleEvent(networkEvent);
     }
 }

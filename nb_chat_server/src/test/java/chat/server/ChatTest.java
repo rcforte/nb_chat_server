@@ -18,8 +18,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class ChatTest {
-    private final ExecutorService executorService = Executors.newFixedThreadPool(2);
-
     private ChatServer chatServer;
     private ChatClient chatClient;
 
@@ -30,12 +28,15 @@ public class ChatTest {
 
         chatClient = new ChatClient("localhost", 9999);
         chatClient.connect();
+
+        Thread.sleep(1000);
     }
 
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() throws Exception {
         chatClient.stop();
         chatServer.stop();
+        Thread.sleep(1000);
     }
 
 

@@ -1,11 +1,14 @@
 package network;
 
+import network.echo.EchoClient;
+import network.echo.EchoServer;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.nio.channels.SocketChannel;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by Rafael on 1/16/2017.
@@ -13,26 +16,21 @@ import static org.junit.Assert.assertTrue;
 public class NetworkFunctionalTest {
 
     @Test
-    public void test() throws IOException {
+    public void test() throws Exception {
+        BlockingQueue<String> queue = new LinkedBlockingDeque<>();
 
-//        NetworkServer server = new NetworkServer(9999);
-//        server.start();
-//
-//        NetworkClient client1 = new NetworkClient("localhost", 9999);
-//        client1.addListener(event -> { handleEvent(event); });
-//        client1.connect();
-//        client1.send(data, responseBytes -> handle(responseBytes));
-//        client1.send(data);
-//
-//        NetworkClient client2 = new NetworkClient("localhost", 9999);
-//        client2.addListener(event -> { handleEvent(event); });
-//        client2.connect();
-//        client2.send(data, responseBytes -> handle(responseBytes));
-//        client2.send(data);
-//
-//        server.broadcast(bytes);
+        EchoServer server = new EchoServer(9999);
+        server.start();
 
-        // compare received bytes
+        EchoClient client = new EchoClient("localhost", 9999);
+        client.addMessageListener(message -> queue.add(message));
+        client.connect();
+        client.send("Test");
+
+        assertEquals("Test", queue.poll(2, TimeUnit.SECONDS));
+
+        client.disconnect();
+        server.stop();
     }
 }
 
