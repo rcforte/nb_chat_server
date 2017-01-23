@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
-Test set: chat.server.ChatTest
+Test set: network.echo.EchoServerTest
 -------------------------------------------------------------------------------
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.335 sec
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.987 sec

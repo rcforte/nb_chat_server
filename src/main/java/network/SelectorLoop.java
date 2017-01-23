@@ -33,7 +33,7 @@ class SelectorLoop {
         while (!stopped) {
             try {
                 select();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 logger.error("error during select operation", e);
             }
         }

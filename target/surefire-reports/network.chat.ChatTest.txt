@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
-Test set: network.NetworkFunctionalTest
+Test set: network.chat.ChatTest
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.003 sec
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.918 sec

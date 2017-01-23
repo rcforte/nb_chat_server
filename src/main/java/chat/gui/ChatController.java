@@ -21,14 +21,23 @@ class ChatController {
     public ChatController(ChatModel chatModel, ChatClient chatClient) {
         this.chatModel = chatModel;
         this.chatClient = chatClient;
+        this.chatClient.addChatListener(responseMessage -> {
+            List<String> messages = responseMessage.getPayload().get("message");
+            logger.info("received response: " + messages);
+            for (String message : messages) {
+                chatModel.addMessage(message);
+            }
+        });
     }
 
     public void getChatRooms() {
+        logger.info("getting chat rooms");
         executorService.execute(() -> {
             chatClient.getChatRooms(responseMessage -> {
                 SwingUtilities.invokeLater(() -> {
                     List<String> rooms = responseMessage.getRooms();
-                    chatModel.setChatRooms(rooms);
+                    logger.info("received rooms: " + rooms);
+                    chatModel.setRooms(rooms);
                 });
             });
         });
@@ -39,13 +48,29 @@ class ChatController {
             chatClient.getChatRoomUsers(chatRoom, responseMessage -> {
                 SwingUtilities.invokeLater(() -> {
                     Map<String, List<String>> payload = responseMessage.getPayload();
-                    System.out.println(payload);
+                    logger.info("chat room users: " + payload);
                     List<String> chatUsers = payload.get("chatUsers");
                     if (chatUsers != null) {
-                        chatModel.setChatRoomUsers(chatUsers);
+                        chatModel.setUsers(chatUsers);
                     }
                 });
             });
+        });
+    }
+
+    public void join(String user, String room) {
+        executorService.execute(() -> {
+            logger.info("join: user=" + user + ", room=" + room);
+            chatModel.setUser(user);
+            chatModel.setRoom(room);
+            chatClient.join(user, room);
+        });
+    }
+
+    public void sendMessage(String room, String user, String message) {
+        executorService.execute(() -> {
+            logger.info("sendMessage: room="+room+", user=" + user + ", message=" + message);
+            chatClient.sendMessage(room, user, message);
         });
     }
 }

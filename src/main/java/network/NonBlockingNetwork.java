@@ -71,7 +71,7 @@ public class NonBlockingNetwork {
     public void bind(int port) throws IOException {
         checkArgument(port >= 0, "port cannot be negative");
 
-        logger.info("starting server...");
+        logger.info("binding to port " + port);
 
         selector = Selector.open();
         selectorLoop = new SelectorLoop(selector, selectorListener, handler);
@@ -80,7 +80,7 @@ public class NonBlockingNetwork {
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
         serverSocketChannel.socket().bind(new InetSocketAddress(port));
 
-        logger.info("server started on port " + port);
+        logger.info("socket bound to port " + port);
 
         executorService.execute(() -> {
             selectorLoop.start();

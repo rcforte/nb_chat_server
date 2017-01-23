@@ -86,6 +86,7 @@ public class NetworkServerTest {
             socket.close();
 
             NetworkEvent networkEvent = blockingQueue.poll(1, TimeUnit.SECONDS);
+
             assertNotNull(networkEvent);
             assertEquals(NetworkEventType.DISCONNECT, networkEvent.getType());
             assertNotNull(networkEvent.getSocketChannel());
