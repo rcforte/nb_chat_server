@@ -1,7 +1,7 @@
 package network.chat;
 
 import com.google.common.collect.Maps;
-import network.NonBlockingNetwork;
+import network.Network;
 import org.apache.log4j.Logger;
 
 import java.nio.channels.SocketChannel;
@@ -13,51 +13,37 @@ import java.util.stream.Collectors;
  * Created by Rafael on 1/21/2017.
  */
 public class Chat {
-    private static final Logger logger = Logger.getLogger(Chat.class);
-    private final Map<String, ChatRoom> rooms = Maps.newHashMap();
+  private final Map<String, ChatRoom> rooms = Maps.newHashMap();
 
-    public void addRoom(ChatRoom room) {
-        rooms.put(room.getName(), room);
-    }
+  public void room(ChatRoom room) {
+    rooms.put(room.name(), room);
+  }
 
-    public void removeRoom(ChatRoom room) {
-        rooms.remove(room.getName());
-    }
+  public ChatRoom room(String roomName) {
+    return rooms.get(roomName);
+  }
 
-    public List<ChatRoom> getRooms() {
-        return rooms.values().stream().collect(Collectors.toList());
-    }
+  public List<ChatRoom> rooms() {
+    return rooms.values().stream().collect(Collectors.toList());
+  }
 
-    public void join(SocketChannel socketChannel, String user, String room) {
-        ChatRoom chatRoom = rooms.get(room);
-        logger.info("adding " + user + " to " + chatRoom);
-        chatRoom.addUser(socketChannel, user);
-    }
+  public void join(SocketChannel channel, String user, String room) {
+    rooms.get(room).user(user, channel);
+  }
 
-    public void send(NonBlockingNetwork network, String room, byte[] bytes) {
-        ChatRoom chatRoom = rooms.get(room);
-        logger.info("sending message to room: " + chatRoom);
-        chatRoom.sendMessage(network, bytes);
-    }
+  public void send(Network network, ChatRoom room, byte[] bytes) {
+    room.send(network, bytes);
+  }
 
-    public List<ChatUser> getUsers(String chatRoom) {
-        logger.info("getting room: " + chatRoom);
-        ChatRoom room = rooms.get(chatRoom);
-        logger.info("chat room: " + room);
-        return room.getUsers();
-    }
+  public List<ChatUser> getUsers(String chatRoom) {
+    return rooms.get(chatRoom).users();
+  }
 
-    public ChatUser removeUser(SocketChannel socketChannel) {
-        ChatUser chatUser = null;
-        logger.info("removing user from chat");
-        for (ChatRoom room : rooms.values()) {
-            logger.info("checking room: " + room.getName());
-            chatUser = room.findAndRemoveUser(socketChannel);
-            if (chatUser != null) {
-                break;
-            }
-        }
-        return chatUser;
-    }
-
+  public ChatUser user(SocketChannel channel) {
+    return rooms.values().stream()
+        .map(room -> room.user(channel))
+        .filter(user -> user != null)
+        .findFirst()
+        .orElse(null);
+  }
 }

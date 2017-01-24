@@ -1,7 +1,7 @@
 package network.echo;
 
-import network.NonBlockingNetwork;
-import network.TokenMessageEncoder;
+import network.Network;
+import network.TokenEncoder;
 
 import java.io.IOException;
 
@@ -9,22 +9,22 @@ import java.io.IOException;
  * Created by Rafael on 1/20/2017.
  */
 public class EchoServer {
-    private final int port;
-    private final NonBlockingNetwork network;
+  private final int port;
+  private final Network network;
 
-    public EchoServer(int port) {
-        this.port = port;
-        this.network = new NonBlockingNetwork();
-        this.network.addNetworkListener(
-                new EchoService(
-                        new TokenMessageEncoder("\n")));
-    }
+  public EchoServer(int port) {
+    this.port = port;
+    this.network = new Network();
+    this.network.addNetworkListener(
+        new EchoService(
+            new TokenEncoder("\n")));
+  }
 
-    public void start() throws IOException {
-        network.bind(this.port);
-    }
+  public void start() throws IOException {
+    network.bind(this.port);
+  }
 
-    public void stop() throws IOException {
-        network.stop();
-    }
+  public void stop() throws IOException {
+    network.stop();
+  }
 }

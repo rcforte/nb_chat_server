@@ -1,10 +1,10 @@
 package chat.client;
 
-import chat.common.ResponseMessage;
+import chat.common.Response;
 
 /**
  * Created by Rafael on 1/15/2017.
  */
 public interface Processor {
-	void process(ResponseMessage responseMessage);
+  void process(Response response);
 }

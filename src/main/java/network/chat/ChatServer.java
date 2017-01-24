@@ -1,157 +1,198 @@
 package network.chat;
 
-import chat.common.RequestMessage;
-import chat.common.RequestMessageType;
-import chat.common.ResponseMessage;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import network.NetworkEvent;
-import network.NetworkEventType;
-import network.NetworkListener;
-import network.NonBlockingNetwork;
+import chat.common.Request;
+import chat.common.RequestType;
+import chat.common.Response;
+import network.*;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
+import static chat.common.RequestType.LEAVE;
+import static chat.common.Response.response;
+import static com.google.common.collect.Lists.newArrayList;
+import static network.NetworkEventType.DISCONNECT;
+import static network.NetworkEventType.READ;
+
 public class ChatServer {
-    private static final Logger logger = Logger.getLogger(ChatServer.class);
-    private final int port;
-    private final NonBlockingNetwork network;
-    private final NetworkListener networkListener = networkEvent -> handle(networkEvent);
-    private Chat chat;
+  private static final Logger logger = Logger.getLogger(ChatServer.class);
 
-    public ChatServer(int port) {
-        this.port = port;
-        this.network = new NonBlockingNetwork();
-        this.network.addNetworkListener(networkListener);
+  private final int port;
+  private final Network network;
+  private final NetworkListener networkListener = networkEvent -> handle(networkEvent);
+  private final Encoder<String> encoder = new TokenEncoder("\n");
+
+  private Chat chat;
+
+  public ChatServer(int port) {
+    this.port = port;
+    this.network = new Network();
+    this.network.addNetworkListener(networkListener);
+  }
+
+  public void setChat(Chat chat) {
+    this.chat = chat;
+  }
+
+  public void start() throws IOException {
+    logger.info("starting server");
+    network.bind(port);
+  }
+
+  public void stop() throws IOException {
+    logger.info("stopping server...");
+    network.stop();
+  }
+
+  void handle(NetworkEvent event) {
+    Translator translator = new Translator(encoder);
+    List<Request> requests = translator.translate(event);
+    if (requests != null) {
+      for (Request request : requests) {
+        Command command = getCommand(event.getSocketChannel(), request);
+        command.execute(chat, request);
+      }
     }
+  }
 
-    public void setChat(Chat chat) {
-        this.chat = chat;
+  Command getCommand(SocketChannel socketChannel, Request request) {
+    if (request.getType() == RequestType.GET_ROOMS) {
+      return new GetRoomsCommand(this, socketChannel);
+    } else if (request.getType() == RequestType.GET_ROOM_USERS) {
+      return new GetUsersCommand(this, socketChannel);
+    } else if (request.getType() == RequestType.JOIN) {
+      return new JoinRoomCommand(this, socketChannel);
+    } else if (request.getType() == RequestType.MESSAGE) {
+      return new SendMessageCommand(this, socketChannel);
+    } else if (request.getType() == LEAVE) {
+      return new LeaveRoomCommand(this, socketChannel);
     }
+    return null;
+  }
 
-    public void start() throws IOException {
-        logger.info("starting server");
-        network.bind(port);
+  void send(ChatRoom room, Response resp) {
+    chat.send(network, room, encoder.encode(resp.json()));
+  }
+
+  void send(SocketChannel socketChannel, Response response) {
+    network.send(socketChannel, encoder.encode(response.json()));
+  }
+}
+
+class Translator {
+  private final Encoder<String> encoder;
+
+  public Translator(Encoder<String> encoder) {
+    this.encoder = encoder;
+  }
+
+  public List<Request> translate(NetworkEvent event) {
+    List<Request> requests = null;
+    if (event.getType() == READ) {
+      requests = newArrayList();
+      for (String decoded : encoder.decode(event.getData())) {
+        requests.add(Request.fromString(decoded));
+      }
+    } else if (event.getType() == DISCONNECT) {
+      requests = newArrayList(new Request(LEAVE));
     }
+    return requests;
+  }
+}
 
-    public void stop() throws IOException {
-        logger.info("stopping server...");
-        network.stop();
-    }
+class GetUsersCommand implements Command {
+  private static final Logger logger = Logger.getLogger(GetUsersCommand.class);
+  private final ChatServer server;
+  private final SocketChannel socketChannel;
 
-    void handle(NetworkEvent networkEvent)
-    {
-        if (networkEvent.getType() == NetworkEventType.DISCONNECT)
-        {
-            logger.info("handling disconnect");
-            chat.removeUser(networkEvent.getSocketChannel());
-        }
-        else if (networkEvent.getType() == NetworkEventType.READ)
-        {
-            logger.info("decoding request");
-            SocketChannel socketChannel = networkEvent.getSocketChannel();
-            byte[] data = networkEvent.getData();
-            RequestMessage requestMessage = RequestMessage.fromBytes(data);
+  public GetUsersCommand(ChatServer server, SocketChannel socketChannel) {
+    this.server = server;
+    this.socketChannel = socketChannel;
+  }
 
-            if (requestMessage.getRequestMessageType() == RequestMessageType.GET_ROOMS)
-            {
-                logger.info("handling request: type=GET_ROOMS");
-                ResponseMessage responseMessage = new ResponseMessage();
-                responseMessage.setCorrelationId(requestMessage.getCorrelationId());
-                for (ChatRoom room : chat.getRooms())
-                {
-                    responseMessage.addRoom(room.getName());
-                }
+  @Override
+  public void execute(Chat chat, Request request) {
+    String room = request.get("room");
+    List<String> users = chat.getUsers(room).stream().map(user -> user.name()).collect(Collectors.toList());
+    server.send(socketChannel, new Response(request.getCorrelationId()).with("users", users));
+  }
+}
 
-                logger.info("encoding response");
-                String json = responseMessage.toJson();
-                byte[] jsonBytes = json.getBytes();
+class GetRoomsCommand implements Command {
+  private final ChatServer server;
+  private final SocketChannel channel;
 
-                logger.info("sending response");
-                network.send(socketChannel, jsonBytes);
-            }
-            else if (requestMessage.getRequestMessageType() == RequestMessageType.GET_ROOM_USERS)
-            {
-                Map<String, String> payload = requestMessage.getPayload();
-                String chatRoom = payload.get("chatRoom");
-                logger.info("handling request: room="+chatRoom);
-                List<ChatUser> users = chat.getUsers(chatRoom);
-                List<String> chatUsers = users.stream().map(u -> u.getName()).collect(Collectors.toList());
-                logger.info("room users: " + chatUsers);
+  public GetRoomsCommand(ChatServer server, SocketChannel channel) {
+    this.server = server;
+    this.channel = channel;
+  }
 
-                logger.info("encoding response");
-                ResponseMessage responseMessage = new ResponseMessage();
-                responseMessage.setCorrelationId(requestMessage.getCorrelationId());
-                Map<String, List<String>> responsePayload = Maps.newHashMap();
-                responsePayload.put("chatUsers", chatUsers);
-                responseMessage.setPayload(responsePayload);
-                String json = responseMessage.toJson();
-                byte[] jsonBytes = json.getBytes();
+  @Override
+  public void execute(Chat chat, Request req) {
+    List<String> rooms = chat.rooms().stream().map(room -> room.name()).collect(Collectors.toList());
+    server.send(channel, response(req.corrId()).with("rooms", rooms));
+  }
+}
 
-                logger.info("sending response");
-                network.send(socketChannel, jsonBytes);
-            }
-            else if (requestMessage.getRequestMessageType() == RequestMessageType.JOIN)
-            {
-                Map<String, String> payload = requestMessage.getPayload();
-                String user = payload.get("user");
-                String room = payload.get("room");
-                logger.info("handling request: type=JOIN, user=" + user + ", room=" + room);
-                chat.join(socketChannel, user, room);
+class SendMessageCommand implements Command {
+  private final ChatServer server;
+  private final SocketChannel channel;
 
-                logger.info("encoding response");
-                ResponseMessage responseMessage = new ResponseMessage();
-                Map<String, List<String>> responsePayload = Maps.newHashMap();
-                responsePayload.put("message", Lists.newArrayList(String.format("%s has joined the chat", user)));
-                responseMessage.setPayload(responsePayload);
-                String json = responseMessage.toJson();
-                byte[] jsonBytes = json.getBytes();
+  public SendMessageCommand(ChatServer server, SocketChannel channel) {
+    this.server = server;
+    this.channel = channel;
+  }
 
-                logger.info("sending response");
-                chat.send(network, room, jsonBytes);
-            }
-            else if (requestMessage.getRequestMessageType() == RequestMessageType.MESSAGE)
-            {
-                Map<String, String> payload = requestMessage.getPayload();
-                String room = payload.get("room");
-                String user = payload.get("user");
-                String message = payload.get("message");
-                logger.info("handling request: type=MESSAGE, room="+room+", user="+user+", message=" + message);
+  @Override
+  public void execute(Chat chat, Request req) {
+    String user = req.get("user");
+    String message = req.get("message");
+    String roomName = req.get("room");
+    String msg = user + " says: " + message;
+    server.send(chat.room(roomName), new Response().with("message", msg));
+  }
+}
 
-                logger.info("encoding response");
-                ResponseMessage responseMessage = new ResponseMessage();
-                Map<String, List<String>> responsePayload = Maps.newHashMap();
-                responsePayload.put("message", Lists.newArrayList(user+" says: " + message));
-                responseMessage.setPayload(responsePayload);
-                String json = responseMessage.toJson();
-                byte[] jsonBytes = json.getBytes();
+class JoinRoomCommand implements Command {
+  private final ChatServer server;
+  private final SocketChannel channel;
 
-                logger.info("sending response");
-                chat.send(network, room, jsonBytes);
-            }
-            else if (requestMessage.getRequestMessageType() == RequestMessageType.LEAVE)
-            {
-                Map<String, String> payload = requestMessage.getPayload();
-                String room = payload.get("room");
-                logger.info("handling request: type=LEAVE, room="+room);
-                ChatUser user = chat.removeUser(socketChannel);
+  public JoinRoomCommand(ChatServer server, SocketChannel channel) {
+    this.server = server;
+    this.channel = channel;
+  }
 
-                logger.info("encoding response");
-                Map<String, List<String>> responsePayload = Maps.newHashMap();
-                responsePayload.put("message", Lists.newArrayList(user.getName()+" left the room"));
-                ResponseMessage responseMessage = new ResponseMessage();
-                responseMessage.setPayload(responsePayload);
-                String json = responseMessage.toJson();
-                byte[] jsonBytes = json.getBytes();
+  @Override
+  public void execute(Chat chat, Request request) {
+    String user = request.get("user");
+    String room = request.get("room");
+    chat.join(channel, user, room);
+    String msg = String.format("%s has joined the chat", user);
+    server.send(chat.room(room), response().with("message", msg));
+  }
+}
 
-                logger.info("sending response");
-                chat.send(network, room, jsonBytes);
-            }
-        }
-    }
+class LeaveRoomCommand implements Command {
+  private final ChatServer server;
+  private final SocketChannel channel;
+
+  public LeaveRoomCommand(ChatServer server, SocketChannel channel) {
+    this.server = server;
+    this.channel = channel;
+  }
+
+  @Override
+  public void execute(Chat chat, Request request) {
+    ChatUser user = chat.user(channel);
+    ChatRoom room = user.leave();
+    String msg = user.name() + " left the room";
+    server.send(room, response().with("message", msg));
+  }
+}
+
+interface Command {
+  void execute(Chat chat, Request request);
 }

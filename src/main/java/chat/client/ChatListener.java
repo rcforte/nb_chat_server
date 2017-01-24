@@ -1,7 +1,7 @@
 package chat.client;
 
-import chat.common.ResponseMessage;
+import chat.common.Response;
 
 public interface ChatListener {
-	void onChatEvent(ResponseMessage responseMessage);
+  void onChatEvent(Response response);
 }

@@ -1,27 +1,34 @@
 package network.chat;
 
-import network.NonBlockingNetwork;
+import network.Network;
 
 import java.nio.channels.SocketChannel;
 
 public class ChatUser {
-	private final SocketChannel socketChannel;
-	private final String name;
+  private final SocketChannel channel;
+  private final String name;
+  private final ChatRoom room;
 
-	public ChatUser(SocketChannel socketChannel, String name) {
-		this.name = name;
-		this.socketChannel = socketChannel;
-	}
+  public ChatUser(SocketChannel channel, String name, ChatRoom room) {
+    this.channel = channel;
+    this.name = name;
+    this.room = room;
+  }
 
-	public String getName() {
-		return name;
-	}
+  public String name() {
+    return name;
+  }
 
-	public void send(NonBlockingNetwork network, byte[] bytes) {
-		network.send(socketChannel, bytes);
-	}
+  public void send(Network network, byte[] bytes) {
+    network.send(channel, bytes);
+  }
 
-	public boolean isChannel(SocketChannel socketChannel) {
-		return this.socketChannel == socketChannel;
-	}
+  public boolean has(SocketChannel channel) {
+    return this.channel == channel;
+  }
+
+  public ChatRoom leave() {
+    room.remove(this);
+    return room;
+  }
 }

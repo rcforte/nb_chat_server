@@ -16,58 +16,58 @@ import java.util.concurrent.TimeUnit;
  */
 public class EchoClient {
 
-    private static final Logger logger = Logger.getLogger(EchoClient.class);
+  private static final Logger logger = Logger.getLogger(EchoClient.class);
 
-    private final String host;
-    private final int port;
-    private final List<MessageListener> messageListeners = Lists.newCopyOnWriteArrayList();
-    private final MessageEncoder<String> encoder = new TokenMessageEncoder("\n");
-    private final BlockingQueue<NetworkEvent> blockingQueue = new LinkedBlockingDeque<>();
-    private final NonBlockingNetwork network;
-    private SocketChannel socketChannel;
+  private final String host;
+  private final int port;
+  private final List<MessageListener> messageListeners = Lists.newCopyOnWriteArrayList();
+  private final Encoder<String> encoder = new TokenEncoder("\n");
+  private final BlockingQueue<NetworkEvent> blockingQueue = new LinkedBlockingDeque<>();
+  private final Network network;
+  private SocketChannel socketChannel;
 
-    public EchoClient(String host, int port) {
-        this.host = host;
-        this.port = port;
-        this.network = new NonBlockingNetwork();
-        this.network.addNetworkListener(event -> handle(event));
+  public EchoClient(String host, int port) {
+    this.host = host;
+    this.port = port;
+    this.network = new Network();
+    this.network.addNetworkListener(event -> handle(event));
+  }
+
+  public void addMessageListener(MessageListener messageListener) {
+    messageListeners.add(messageListener);
+  }
+
+  public void connect() throws IOException {
+    network.connect(this.host, this.port);
+    try {
+      blockingQueue.poll(1, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
     }
+  }
 
-    public void addMessageListener(MessageListener messageListener) {
-        messageListeners.add(messageListener);
-    }
+  public void send(String message) {
+    network.send(socketChannel, encoder.encode(message));
+  }
 
-    public void connect() throws IOException {
-        network.connect(this.host, this.port);
-        try {
-            blockingQueue.poll(1, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+  private void notifyMessageListeners(String message) {
+    for (MessageListener messageListener : messageListeners) {
+      messageListener.onMessage(message);
     }
+  }
 
-    public void send(String message) {
-        network.send(socketChannel, encoder.encode(message));
-    }
+  public void disconnect() throws IOException {
+    network.stop();
+  }
 
-    private void notifyMessageListeners(String message) {
-        for (MessageListener messageListener : messageListeners) {
-            messageListener.onMessage(message);
-        }
+  void handle(NetworkEvent event) {
+    if (event.getType() == NetworkEventType.CONNECT) {
+      socketChannel = event.getSocketChannel();
+    } else if (event.getType() == NetworkEventType.READ) {
+      List<String> messages = encoder.decode(event.getData());
+      for (String message : messages) {
+        notifyMessageListeners(message);
+      }
     }
-
-    public void disconnect() throws IOException {
-        network.stop();
-    }
-
-    void handle(NetworkEvent event) {
-        if (event.getType() == NetworkEventType.CONNECT) {
-            socketChannel = event.getSocketChannel();
-        } else if (event.getType() == NetworkEventType.READ) {
-            List<String> messages = encoder.decode(event.getData());
-            for (String message : messages) {
-                notifyMessageListeners(message);
-            }
-        }
-    }
+  }
 }

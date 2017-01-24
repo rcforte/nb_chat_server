@@ -5,6 +5,7 @@ package network;
  */
 interface SelectorListener {
 
-    void onClosed();
-    void onBeforeSelect();
+  void onClosed();
+
+  void onBeforeSelect();
 }

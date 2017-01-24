@@ -12,18 +12,18 @@ import java.awt.*;
 // TODO: write more tests with multiple threads
 // TODO: message framing
 public class ChatFrame extends JFrame {
-    private static final Logger logger = Logger.getLogger(ChatFrame.class);
+  private static final Logger logger = Logger.getLogger(ChatFrame.class);
 
-    private final ChatModel chatModel;
-    private final ChatView chatView;
-    private final ChatController chatController;
+  private final ChatModel chatModel;
+  private final ChatView chatView;
+  private final ChatController chatController;
 
-    public ChatFrame(ChatModel chatModel, ChatView chatView, ChatController chatController) {
-        this.chatModel = chatModel;
-        this.chatView = chatView;
-        this.chatController = chatController;
+  public ChatFrame(ChatModel chatModel, ChatView chatView, ChatController chatController) {
+    this.chatModel = chatModel;
+    this.chatView = chatView;
+    this.chatController = chatController;
 
-        getContentPane().add(BorderLayout.CENTER, chatView);
-    }
+    getContentPane().add(BorderLayout.CENTER, chatView);
+  }
 }
 

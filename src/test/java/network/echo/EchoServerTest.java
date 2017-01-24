@@ -1,7 +1,5 @@
 package network.echo;
 
-import network.echo.EchoClient;
-import network.echo.EchoServer;
 import org.junit.Test;
 
 import java.util.concurrent.BlockingQueue;
@@ -15,22 +13,22 @@ import static org.junit.Assert.assertEquals;
  */
 public class EchoServerTest {
 
-    @Test
-    public void test() throws Exception {
-        BlockingQueue<String> queue = new LinkedBlockingDeque<>();
+  @Test
+  public void test() throws Exception {
+    BlockingQueue<String> queue = new LinkedBlockingDeque<>();
 
-        EchoServer server = new EchoServer(9999);
-        server.start();
+    EchoServer server = new EchoServer(9999);
+    server.start();
 
-        EchoClient client = new EchoClient("localhost", 9999);
-        client.addMessageListener(message -> queue.add(message));
-        client.connect();
-        client.send("Test");
+    EchoClient client = new EchoClient("localhost", 9999);
+    client.addMessageListener(message -> queue.add(message));
+    client.connect();
+    client.send("Test");
 
-        assertEquals("Test", queue.poll(2, TimeUnit.SECONDS));
+    assertEquals("Test", queue.poll(2, TimeUnit.SECONDS));
 
-        client.disconnect();
-        server.stop();
-    }
+    client.disconnect();
+    server.stop();
+  }
 }
 

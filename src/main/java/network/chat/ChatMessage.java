@@ -4,31 +4,31 @@ package network.chat;
  * Created by Rafael on 1/21/2017.
  */
 public class ChatMessage {
-    private String userName;
-    private String roomName;
-    private String message;
+  private String user;
+  private String room;
+  private String message;
 
-    public String getUserName() {
-        return userName;
-    }
+  public String getUser() {
+    return user;
+  }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
+  public void setUser(String user) {
+    this.user = user;
+  }
 
-    public String getRoomName() {
-        return roomName;
-    }
+  public String getRoom() {
+    return room;
+  }
 
-    public void setRoomName(String roomName) {
-        this.roomName = roomName;
-    }
+  public void setRoom(String room) {
+    this.room = room;
+  }
 
-    public String getMessage() {
-        return message;
-    }
+  public String getMessage() {
+    return message;
+  }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
+  public void setMessage(String message) {
+    this.message = message;
+  }
 }

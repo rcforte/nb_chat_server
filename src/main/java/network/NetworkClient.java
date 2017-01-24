@@ -13,38 +13,37 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Created by Rafael on 1/20/2017.
  */
 class NetworkClient {
-    private final List<NetworkListener> networkListeners = Lists.newCopyOnWriteArrayList();
-    private final NonBlockingNetwork network;
-    private final NetworkListener networkListener = networkEvent -> {
-        if (networkEvent.getType() == NetworkEventType.CONNECT) {
-            socketChannel = networkEvent.getSocketChannel();
-        }
-    };
-
-    private SocketChannel socketChannel;
-
-    public NetworkClient(NonBlockingNetwork network) {
-        this.network = network;
-        this.network.addNetworkListener(networkListener);
+  private final List<NetworkListener> networkListeners = Lists.newCopyOnWriteArrayList();
+  private final Network network;
+  private SocketChannel socketChannel;
+  private final NetworkListener networkListener = networkEvent -> {
+    if (networkEvent.getType() == NetworkEventType.CONNECT) {
+      socketChannel = networkEvent.getSocketChannel();
     }
+  };
 
-    public void addNetworkListener(NetworkListener networkListener) {
-        this.network.addNetworkListener(networkListener);
-    }
+  public NetworkClient(Network network) {
+    this.network = network;
+    this.network.addNetworkListener(networkListener);
+  }
 
-    public void removeNetworkListener(NetworkListener networkListener) {
-        this.network.removeNetworkListener(networkListener);
-    }
+  public void addNetworkListener(NetworkListener networkListener) {
+    this.network.addNetworkListener(networkListener);
+  }
 
-    public void connect(String host, int port) throws IOException {
-        this.network.connect(host, port);
-    }
+  public void removeNetworkListener(NetworkListener networkListener) {
+    this.network.removeNetworkListener(networkListener);
+  }
 
-    public void send(byte[] data) {
-        checkArgument(data != null, "data cannot be null");
-        checkArgument(data.length > 0, "data cannot be empty");
-        checkNotNull(socketChannel, "chat.client not connected");
+  public void connect(String host, int port) throws IOException {
+    this.network.connect(host, port);
+  }
 
-        this.network.send(socketChannel, data);
-    }
+  public void send(byte[] data) {
+    checkArgument(data != null, "data cannot be null");
+    checkArgument(data.length > 0, "data cannot be empty");
+    checkNotNull(socketChannel, "chat.client not connected");
+
+    this.network.send(socketChannel, data);
+  }
 }
