@@ -12,6 +12,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.Thread.sleep;
+import static network.NetworkEventType.READ;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -23,9 +26,7 @@ public class NetworkClientTest {
 
   @Before
   public void setup() throws IOException {
-    EchoService echoService =
-        new EchoService(new TokenEncoder("\n"));
-
+    EchoService echoService = new EchoService();
     server = new Network();
     server.addNetworkListener(echoService);
     server.bind(9999);
@@ -34,56 +35,58 @@ public class NetworkClientTest {
   @After
   public void teardown() throws Exception {
     server.stop();
-    Thread.sleep(1000);
+    sleep(1000);
   }
 
   @Test
   public void receivesResponseUsingListener() throws Exception {
-    BlockingQueue<NetworkEvent> blockingQueue = new LinkedBlockingDeque<>();
-    TokenEncoder encoder = new TokenEncoder("\n");
-    NetworkClient networkClient = new NetworkClient(new Network());
-    networkClient.addNetworkListener(networkEvent -> {
-      if (networkEvent.getType() == NetworkEventType.READ) {
-        blockingQueue.add(networkEvent);
+    BlockingQueue<NetworkEvent> queue = new LinkedBlockingDeque<>();
+    StringEncoder encoder = new StringEncoder("\n");
+    StringDecoder decoder = new StringDecoder("\n");
+    NetworkClient client = new NetworkClient(new Network());
+    client.addNetworkListener(evt -> {
+      if (evt.getType() == READ) {
+        queue.add(evt);
       }
     });
-    networkClient.connect("localhost", 9999);
-    Thread.sleep(1000);
+    client.connect("localhost", 9999);
+    sleep(1000);
 
-    networkClient.send(encoder.encode("This is a test"));
+    client.send(encoder.apply(newArrayList("This is a test")));
 
-    NetworkEvent networkEvent = blockingQueue.poll(1, TimeUnit.SECONDS);
-    assertNotNull(networkEvent);
-    assertEquals(NetworkEventType.READ, networkEvent.getType());
-    assertEquals("This is a test", encoder.decode(networkEvent.getData()).get(0));
+    NetworkEvent event = queue.poll(1, TimeUnit.SECONDS);
+    assertNotNull(event);
+    assertEquals(READ, event.getType());
+    assertEquals("This is a test", decoder.apply(event.getData()).get(0));
   }
 
   @Test
   public void receivesMessage() throws Exception {
-    BlockingQueue<NetworkEvent> blockingQueue = new LinkedBlockingDeque<>();
-    NetworkListener networkListener = networkEvent -> {
-      if (networkEvent.getType() == NetworkEventType.READ) {
-        blockingQueue.add(networkEvent);
+    BlockingQueue<NetworkEvent> queue = new LinkedBlockingDeque<>();
+    NetworkListener lstn = networkEvent -> {
+      if (networkEvent.getType() == READ) {
+        queue.add(networkEvent);
       }
     };
-    TokenEncoder encoder = new TokenEncoder("\n");
-    List<String> sent = Lists.newArrayList("Message1", "Message2", "Message3");
+    StringEncoder encoder = new StringEncoder("\n");
+    StringDecoder decoder = new StringDecoder("\n");
+    List<String> sent = newArrayList("Message1", "Message2", "Message3");
 
-    NetworkClient networkClient = new NetworkClient(new Network());
-    networkClient.addNetworkListener(networkListener);
-    networkClient.connect("localhost", 9999);
-    Thread.sleep(1000);
+    NetworkClient cli = new NetworkClient(new Network());
+    cli.addNetworkListener(lstn);
+    cli.connect("localhost", 9999);
+    sleep(1000);
 
-    sent.stream().forEach(message ->
-        server.broadcast(encoder.encode(message))
-    );
+    sent.stream()
+        .map(Lists::newArrayList)
+        .forEach(msgs -> server.broadcast(encoder.apply(msgs)));
 
-    List<String> received = Lists.newArrayList();
+    List<String> received = newArrayList();
     while (received.size() != 3) {
-      NetworkEvent networkEvent = blockingQueue.poll(1, TimeUnit.SECONDS);
-      assertNotNull(networkEvent);
-      assertEquals(NetworkEventType.READ, networkEvent.getType());
-      received.addAll(encoder.decode(networkEvent.getData()));
+      NetworkEvent evt = queue.poll(1, TimeUnit.SECONDS);
+      assertNotNull(evt);
+      assertEquals(READ, evt.getType());
+      received.addAll(decoder.apply(evt.getData()));
     }
 
     assertEquals("Wrong messages received from server", sent, received);

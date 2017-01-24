@@ -5,6 +5,7 @@ import network.Network;
 import org.apache.log4j.Logger;
 
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,8 +16,14 @@ import java.util.stream.Collectors;
 public class Chat {
   private final Map<String, ChatRoom> rooms = Maps.newHashMap();
 
-  public void room(ChatRoom room) {
+  public Chat room(ChatRoom room) {
     rooms.put(room.name(), room);
+    return this;
+  }
+
+  public Chat rooms(ChatRoom ... room) {
+    Arrays.stream(room).forEach(this::room);
+    return this;
   }
 
   public ChatRoom room(String roomName) {

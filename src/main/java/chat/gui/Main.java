@@ -1,6 +1,7 @@
 package chat.gui;
 
 import chat.client.ChatClient;
+import network.chat.ChatTranslator;
 import org.apache.log4j.Logger;
 
 import javax.swing.*;
@@ -12,14 +13,14 @@ public class Main {
   public static void main(String[] args) {
     SwingUtilities.invokeLater(() -> {
       try {
-        ChatClient chatClient = new ChatClient("localhost", 9999);
-        chatClient.connect();
+        ChatClient client = new ChatClient("localhost", 9999, ChatTranslator.translator());
+        client.connect();
 
-        ChatModel chatModel = new ChatModel();
-        ChatController chatController = new ChatController(chatModel, chatClient);
-        ChatView chatView = new ChatView(chatController, chatModel);
+        ChatModel model = new ChatModel();
+        ChatController controller = new ChatController(model, client);
+        ChatView view = new ChatView(controller, model);
 
-        JFrame frame = new ChatFrame(chatModel, chatView, chatController);
+        JFrame frame = new ChatFrame(model, view, controller);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setTitle("Chat Application");
         frame.setSize(400, 200);

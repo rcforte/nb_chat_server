@@ -11,6 +11,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static network.NetworkEventType.CONNECT;
+import static network.NetworkEventType.READ;
+
 /**
  * Created by Rafael on 1/20/2017.
  */
@@ -21,10 +25,11 @@ public class EchoClient {
   private final String host;
   private final int port;
   private final List<MessageListener> messageListeners = Lists.newCopyOnWriteArrayList();
-  private final Encoder<String> encoder = new TokenEncoder("\n");
   private final BlockingQueue<NetworkEvent> blockingQueue = new LinkedBlockingDeque<>();
   private final Network network;
-  private SocketChannel socketChannel;
+  private final StringEncoder encoder = new StringEncoder("\n");
+  private final StringDecoder decoder = new StringDecoder("\n");
+  private SocketChannel channel;
 
   public EchoClient(String host, int port) {
     this.host = host;
@@ -46,8 +51,8 @@ public class EchoClient {
     }
   }
 
-  public void send(String message) {
-    network.send(socketChannel, encoder.encode(message));
+  public void send(String msg) {
+    network.send(channel, encoder.apply(newArrayList(msg)));
   }
 
   private void notifyMessageListeners(String message) {
@@ -61,13 +66,11 @@ public class EchoClient {
   }
 
   void handle(NetworkEvent event) {
-    if (event.getType() == NetworkEventType.CONNECT) {
-      socketChannel = event.getSocketChannel();
-    } else if (event.getType() == NetworkEventType.READ) {
-      List<String> messages = encoder.decode(event.getData());
-      for (String message : messages) {
-        notifyMessageListeners(message);
-      }
+    if (event.getType() == CONNECT) {
+      channel = event.getSocketChannel();
+    } else if (event.getType() == READ) {
+      decoder.apply(event.getData()).stream()
+          .forEach(this::notifyMessageListeners);
     }
   }
 }

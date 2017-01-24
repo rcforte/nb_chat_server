@@ -1,7 +1,7 @@
 package network.echo;
 
 import network.Network;
-import network.TokenEncoder;
+import network.StringDecoder;
 
 import java.io.IOException;
 
@@ -15,9 +15,7 @@ public class EchoServer {
   public EchoServer(int port) {
     this.port = port;
     this.network = new Network();
-    this.network.addNetworkListener(
-        new EchoService(
-            new TokenEncoder("\n")));
+    this.network.addNetworkListener(new EchoService());
   }
 
   public void start() throws IOException {

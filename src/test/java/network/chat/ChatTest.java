@@ -1,12 +1,13 @@
 package network.chat;
 
 import chat.client.ChatClient;
-import com.google.common.collect.Lists;
+import network.Network;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.Thread.sleep;
 import static org.junit.Assert.assertEquals;
 
@@ -21,21 +22,21 @@ public class ChatTest {
   public void functionalTest() throws Exception {
 
     int port = 9998;
-    List<String> rafaelMessages = Lists.newArrayList();
-    List<String> joeMessages = Lists.newArrayList();
+    List<String> rafaelMessages = newArrayList();
+    List<String> joeMessages = newArrayList();
 
     // create a chat
-    Chat chat = new Chat();
-    chat.room(new ChatRoom("Java Programming"));
-    chat.room(new ChatRoom("C++ Programming"));
+    Chat chat = new Chat().rooms(
+        new ChatRoom("Java Programming"),
+        new ChatRoom("C++ Programming"));
 
     // create a chat server
-    ChatServer chatServer = new ChatServer(port);
-    chatServer.setChat(chat);
-    chatServer.start();
+    Network network = new Network();
+    network.addNetworkListener(new ChatListener(network, chat, ChatTranslator.translator()));
+    network.bind(port);
 
     // create a chat client
-    ChatClient rafael = new ChatClient("localhost", port);
+    ChatClient rafael = new ChatClient("localhost", port, ChatTranslator.translator());
     rafael.addChatListener(responseMessage -> {
       rafaelMessages.addAll(responseMessage.get("message"));
     });
@@ -50,7 +51,7 @@ public class ChatTest {
     rafael.join("Rafael", rooms.get(0).name());
 
     // create another client
-    ChatClient joe = new ChatClient("localhost", port);
+    ChatClient joe = new ChatClient("localhost", port, ChatTranslator.translator());
     joe.addChatListener(responseMessage -> {
       joeMessages.addAll(responseMessage.get("message"));
     });
@@ -79,16 +80,16 @@ public class ChatTest {
     sleep(TIMEOUT);
 
     assertEquals("Problem with Rafael's messages",
-        Lists.newArrayList(
+        newArrayList(
             "Rafael has joined the chat", "Joe has joined the chat",
             "Joe says: Hello", "Rafael says: Hello back!", "Joe left the room"),
         rafaelMessages);
     assertEquals("Problem with Joe's messages",
-        Lists.newArrayList("Joe has joined the chat", "Joe says: Hello", "Rafael says: Hello back!"),
+        newArrayList("Joe has joined the chat", "Joe says: Hello", "Rafael says: Hello back!"),
         joeMessages);
 
     // stop the server
     logger.info("stopping server");
-    chatServer.stop();
+    network.stop();
   }
 }
