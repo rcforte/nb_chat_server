@@ -43,6 +43,10 @@ public class NetworkEvent {
     this.data = data;
   }
 
+  public Network network() {
+    return getNetwork();
+  }
+
   public NetworkEventType type() {
     return getType();
   }

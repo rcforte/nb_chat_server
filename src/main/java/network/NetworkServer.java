@@ -7,8 +7,11 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.util.function.BiConsumer;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static network.NetworkEventType.READ;
 
 /**
  * Created by Rafael on 1/24/2017.
@@ -17,6 +20,15 @@ public class NetworkServer extends Network {
   private static final Logger logger = Logger.getLogger(NetworkServer.class);
 
   private ServerSocketChannel channel;
+  private BiConsumer onRead;
+
+  public NetworkServer() {
+    addListener(evt -> {
+      if (evt.type() == READ && onRead != null) {
+        onRead.accept(evt.channel(), evt.data());
+      }
+    });
+  }
 
   public void bind(int port) throws IOException {
     checkArgument(port >= 0, "port cannot be negative");
@@ -33,6 +45,10 @@ public class NetworkServer extends Network {
     logger.info("socket bound to port " + port);
 
     executor.execute(() -> selectorLoop.start());
+  }
+
+  public void onRead(BiConsumer<SocketChannel, byte[]> func) {
+    this.onRead = func;
   }
 
   @Override

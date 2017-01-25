@@ -8,15 +8,31 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static network.NetworkEventType.CONNECT;
+import static network.NetworkEventType.READ;
 
 /**
  * Created by Rafael on 1/24/2017.
  */
 public class NetworkClient extends Network {
   private static final Logger logger = Logger.getLogger(NetClient.class);
+
   private SocketChannel channel;
+  private Consumer<SocketChannel> onConnected;
+  private Consumer<byte[]> onRead;
+
+  public NetworkClient() {
+    addListener(evt -> {
+      if (evt.type() == CONNECT && onConnected != null) {
+        onConnected.accept(evt.channel());
+      } else if (evt.type() == READ && onRead != null) {
+        onRead.accept(evt.data());
+      }
+    });
+  }
 
   public void connect(String host, int port) throws IOException {
     checkArgument(host != null, "host cannot be null");
@@ -50,4 +66,13 @@ public class NetworkClient extends Network {
       }
     }
   }
+
+  public void onConnected(Consumer<SocketChannel> func) {
+    this.onConnected = func;
+  }
+
+  public void onRead(Consumer<byte[]> func) {
+    this.onRead = func;
+  }
 }
+

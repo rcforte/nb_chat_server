@@ -1,15 +1,24 @@
 package network.echo;
 
+import chat.common.Message;
 import network.Network;
+import network.NetworkClient;
+import network.NetworkServer;
+import network.chat.ChatTranslator;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Thread.sleep;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static network.NetworkEventType.CONNECT;
 import static network.NetworkEventType.READ;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /**
  * Created by Rafael on 1/16/2017.
@@ -17,7 +26,7 @@ import static org.junit.Assert.assertEquals;
 public class EchoServerTest {
 
   @Test
-  public void test() throws Exception {
+  public void oldWay() throws Exception {
     BlockingQueue<String> queue = new LinkedBlockingDeque<>();
 
     EchoServer server = new EchoServer(9999);
@@ -28,31 +37,25 @@ public class EchoServerTest {
     client.connect();
     client.send("Test");
 
-    assertEquals("Test", queue.poll(2, TimeUnit.SECONDS));
+    assertEquals("Test", queue.poll(2, SECONDS));
 
     client.disconnect();
     server.stop();
   }
 
   @Test
-  public void simple() throws Exception {
-//    Network srv = new Network();
-//    srv.addListener(evt -> {
-//      if (evt.type() == READ) {
-//        evt.getNetwork().send(evt.channel(), evt.data());
-//      }
-//    });
-//    srv.bind(9999);
-//    sleep(1000);
-//
-//    Network cli = new Network();
-//    cli.addListener(evt -> {
-//      if (evt.type() == READ) {
-//        System.out.println(new String(evt.data()));
-//      }
-//    });
-//    cli.connect("localhost", 9999);
-//    cli.send();
+  public void newWay() throws Exception {
+    NetworkServer srv = new NetworkServer();
+    srv.onRead((channel, bytes) -> srv.send(channel, bytes));
+    srv.bind(9999);
+
+    BlockingQueue<String> queue = new LinkedBlockingDeque<>(1);
+    NetworkClient cli = new NetworkClient();
+    cli.onConnected(channel -> cli.send("test".getBytes()));
+    cli.onRead(bytes -> queue.add(new String(bytes)));
+    cli.connect("localhost", 9999);
+
+    assertThat(queue.poll(1, SECONDS), equalTo("test"));
   }
 }
 
