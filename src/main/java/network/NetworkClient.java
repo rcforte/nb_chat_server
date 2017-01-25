@@ -1,49 +1,53 @@
 package network;
 
-import com.google.common.collect.Lists;
+import org.apache.log4j.Logger;
+import sun.security.krb5.internal.NetClient;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Created by Rafael on 1/20/2017.
+ * Created by Rafael on 1/24/2017.
  */
-class NetworkClient {
-  private final List<NetworkListener> networkListeners = Lists.newCopyOnWriteArrayList();
-  private final Network network;
-  private SocketChannel socketChannel;
-  private final NetworkListener networkListener = networkEvent -> {
-    if (networkEvent.getType() == NetworkEventType.CONNECT) {
-      socketChannel = networkEvent.getSocketChannel();
-    }
-  };
-
-  public NetworkClient(Network network) {
-    this.network = network;
-    this.network.addNetworkListener(networkListener);
-  }
-
-  public void addNetworkListener(NetworkListener networkListener) {
-    this.network.addNetworkListener(networkListener);
-  }
-
-  public void removeNetworkListener(NetworkListener networkListener) {
-    this.network.removeNetworkListener(networkListener);
-  }
+public class NetworkClient extends Network {
+  private static final Logger logger = Logger.getLogger(NetClient.class);
+  private SocketChannel channel;
 
   public void connect(String host, int port) throws IOException {
-    this.network.connect(host, port);
+    checkArgument(host != null, "host cannot be null");
+    checkArgument(port >= 0, "port cannot be negative");
+
+    logger.info("connecting to server...");
+
+    selector = Selector.open();
+    selectorLoop = new SelectorLoop(selector, selectorListener, handler);
+    channel = SocketChannel.open();
+    channel.configureBlocking(false);
+    channel.register(selector, SelectionKey.OP_CONNECT);
+    channel.connect(new InetSocketAddress(host, port));
+
+    logger.info("connected to " + host + ":" + port);
+
+    executor.execute(() -> selectorLoop.start());
   }
 
   public void send(byte[] data) {
-    checkArgument(data != null, "data cannot be null");
-    checkArgument(data.length > 0, "data cannot be empty");
-    checkNotNull(socketChannel, "chat.client not connected");
+    send(channel, data);
+  }
 
-    this.network.send(socketChannel, data);
+  @Override
+  protected void stopImpl() {
+    if (channel != null) {
+      try {
+        channel.close();
+      } catch (Exception e) {
+        logger.error("Error closing channel", e);
+      }
+    }
   }
 }

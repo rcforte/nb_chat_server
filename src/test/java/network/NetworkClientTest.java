@@ -22,13 +22,13 @@ import static org.junit.Assert.assertNotNull;
  * Created by Rafael on 1/16/2017.
  */
 public class NetworkClientTest {
-  Network server;
+  NetworkServer server;
 
   @Before
   public void setup() throws IOException {
     EchoService echoService = new EchoService();
-    server = new Network();
-    server.addNetworkListener(echoService);
+    server = new NetworkServer();
+    server.addListener(echoService);
     server.bind(9999);
   }
 
@@ -43,8 +43,8 @@ public class NetworkClientTest {
     BlockingQueue<NetworkEvent> queue = new LinkedBlockingDeque<>();
     StringEncoder encoder = new StringEncoder("\n");
     StringDecoder decoder = new StringDecoder("\n");
-    NetworkClient client = new NetworkClient(new Network());
-    client.addNetworkListener(evt -> {
+    NetworkClient client = new NetworkClient();
+    client.addListener(evt -> {
       if (evt.getType() == READ) {
         queue.add(evt);
       }
@@ -72,8 +72,8 @@ public class NetworkClientTest {
     StringDecoder decoder = new StringDecoder("\n");
     List<String> sent = newArrayList("Message1", "Message2", "Message3");
 
-    NetworkClient cli = new NetworkClient(new Network());
-    cli.addNetworkListener(lstn);
+    NetworkClient cli = new NetworkClient();
+    cli.addListener(lstn);
     cli.connect("localhost", 9999);
     sleep(1000);
 

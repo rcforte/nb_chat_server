@@ -1,6 +1,5 @@
 package network;
 
-import com.google.common.collect.Lists;
 import network.echo.EchoService;
 import org.junit.After;
 import org.junit.Before;
@@ -25,11 +24,11 @@ import static org.junit.Assert.assertNotNull;
  */
 public class NetworkServerTest {
   private final long timeout = 1000;
-  private Network server;
+  private NetworkServer server;
 
   @Before
   public void setup() throws IOException {
-    server = new Network();
+    server = new NetworkServer();
     server.bind(9999);
   }
 
@@ -42,7 +41,7 @@ public class NetworkServerTest {
   @Test
   public void serverAcceptsConnections() throws Exception {
     BlockingQueue<NetworkEvent> queue = new LinkedBlockingDeque<>();
-    server.addNetworkListener(e -> queue.add(e));
+    server.addListener(e -> queue.add(e));
 
     List<Socket> sockets = newArrayList();
     for (int i = 0; i < 1000; i++) {
@@ -61,7 +60,7 @@ public class NetworkServerTest {
     String sent = "Sample message";
     StringEncoder encoder = new StringEncoder("\n");
     StringDecoder decoder = new StringDecoder("\n");
-    server.addNetworkListener(new EchoService());
+    server.addListener(new EchoService());
 
     List<Socket> sockets = newArrayList();
     for (int i = 0; i < 1000; i++) {
@@ -81,7 +80,7 @@ public class NetworkServerTest {
   @Test
   public void serverAcceptsClientsClose() throws Exception {
     BlockingQueue<NetworkEvent> queue = new LinkedBlockingDeque<>();
-    server.addNetworkListener(e -> {
+    server.addListener(e -> {
       if (e.getType() == DISCONNECT) {
         queue.add(e);
       }

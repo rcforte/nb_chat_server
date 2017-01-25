@@ -20,6 +20,7 @@ network\chat\ChatRoom.class
 network\Handler.class
 chat\gui\ChatFrame.class
 network\echo\EchoService.class
+network\NetworkServer.class
 network\Network.class
 network\chat\Main.class
 network\chat\ChatUser.class

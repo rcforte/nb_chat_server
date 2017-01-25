@@ -2,7 +2,9 @@ package network.echo;
 
 import com.google.common.collect.Lists;
 import network.*;
+import network.NetworkClient;
 import org.apache.log4j.Logger;
+import sun.net.*;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
@@ -26,7 +28,7 @@ public class EchoClient {
   private final int port;
   private final List<MessageListener> messageListeners = Lists.newCopyOnWriteArrayList();
   private final BlockingQueue<NetworkEvent> blockingQueue = new LinkedBlockingDeque<>();
-  private final Network network;
+  private final NetworkClient network;
   private final StringEncoder encoder = new StringEncoder("\n");
   private final StringDecoder decoder = new StringDecoder("\n");
   private SocketChannel channel;
@@ -34,8 +36,8 @@ public class EchoClient {
   public EchoClient(String host, int port) {
     this.host = host;
     this.port = port;
-    this.network = new Network();
-    this.network.addNetworkListener(event -> handle(event));
+    this.network = new NetworkClient();
+    this.network.addListener(event -> handle(event));
   }
 
   public void addMessageListener(MessageListener messageListener) {

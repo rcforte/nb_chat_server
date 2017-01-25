@@ -2,7 +2,10 @@ package chat.client;
 
 import chat.common.Message;
 import com.google.common.collect.Maps;
-import network.*;
+import network.Network;
+import network.NetworkClient;
+import network.NetworkEvent;
+import network.NetworkListener;
 import network.chat.ChatRoom;
 import network.chat.Translator;
 import org.apache.log4j.Logger;
@@ -15,12 +18,12 @@ import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.TimeUnit;
 
 import static chat.common.Message.message;
 import static chat.common.MessageType.*;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
 import static network.NetworkEventType.CONNECT;
 import static network.NetworkEventType.READ;
@@ -31,7 +34,7 @@ public class ChatClientImpl implements ChatClient, NetworkListener {
 
   private final String host;
   private final int port;
-  private final Network network;
+  private final NetworkClient network;
   private final List<ChatListener> listeners = new CopyOnWriteArrayList<>();
   private final Map<String, Processor> processors = Maps.newConcurrentMap();
   private final Translator<byte[], List<Message>> translator;
@@ -41,8 +44,8 @@ public class ChatClientImpl implements ChatClient, NetworkListener {
   public ChatClientImpl(String host, int port, Translator<byte[], List<Message>> translator) {
     this.host = host;
     this.port = port;
-    this.network = new Network();
-    this.network.addNetworkListener(this);
+    this.network = new NetworkClient();
+    this.network.addListener(this);
     this.translator = translator;
   }
 
@@ -58,12 +61,12 @@ public class ChatClientImpl implements ChatClient, NetworkListener {
 
   @Override
   public void addNetworkListener(NetworkListener lstn) {
-    network.addNetworkListener(lstn);
+    network.addListener(lstn);
   }
 
   @Override
   public void removeNetworkListener(NetworkListener lstn) {
-    network.removeNetworkListener(lstn);
+    network.removeListener(lstn);
   }
 
   @Override
@@ -83,7 +86,7 @@ public class ChatClientImpl implements ChatClient, NetworkListener {
 
   @Override
   public void leave(String room) {
-    send(message(LEAVE).with("room",room));
+    send(message(LEAVE).with("room", room));
   }
 
   @Override
@@ -93,8 +96,10 @@ public class ChatClientImpl implements ChatClient, NetworkListener {
     processors.put(corrId, msg -> queue.add(msg));
     try {
       send(message(GET_ROOMS, corrId));
-      Message msg = queue.poll(timeout, TimeUnit.SECONDS);
-      return msg.get("rooms").stream().map(ChatRoom::new).collect(toList());
+      return queue.poll(timeout, SECONDS).get("rooms")
+          .stream()
+          .map(ChatRoom::new)
+          .collect(toList());
     } catch (InterruptedException e) {
       logger.error(e.getMessage(), e);
       return null;
@@ -103,7 +108,7 @@ public class ChatClientImpl implements ChatClient, NetworkListener {
 
   public void stop() {
     network.stop();
-    network.removeNetworkListener(this);
+    network.removeListener(this);
   }
 
   public void getChatRooms(Processor processor) {

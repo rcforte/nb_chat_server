@@ -51,7 +51,7 @@ class SelectorLoop {
   void select() throws IOException {
     selectorListener.onBeforeSelect();
 
-    int n = selector.select(1000L);
+    int n = selector.select(100L);
     if (n == 0) {
       return;
     }

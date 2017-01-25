@@ -1,6 +1,6 @@
 package network.chat;
 
-import network.Network;
+import network.NetworkServer;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -17,7 +17,6 @@ public class ChatTest {
   private static final Logger logger = Logger.getLogger(ChatTest.class);
   private static final String HOST = "localhost";
   private static final int PORT = 9998;
-  private static final int TIMEOUT = 1000;
 
   @Test
   public void functionalTest() throws Exception {
@@ -31,12 +30,13 @@ public class ChatTest {
     Chat chat = new Chat().rooms(rooms.toArray(new ChatRoom[]{}));
 
     // create a chat server
-    Network network = new Network();
-    network.addNetworkListener(new ChatService(network, chat, translator()));
-    network.bind(PORT);
+    NetworkServer srv = new NetworkServer();
+    srv.addListener(new ChatService(srv, chat, translator()));
+    srv.bind(PORT);
 
     // create a chat client
-    BlockClient rafael = BlockClient.client(HOST, PORT);;
+    BlockClient rafael = BlockClient.client(HOST, PORT);
+    ;
     rafael.addListener(msg -> rafaelMsgs.addAll(msg.get("message")));
 
     logger.info("Rafael is connecting");
@@ -98,7 +98,7 @@ public class ChatTest {
 
     // stop the server
     logger.info("stopping server");
-    network.stop();
+    srv.stop();
   }
 }
 

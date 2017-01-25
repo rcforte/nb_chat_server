@@ -1,6 +1,7 @@
 package network.chat;
 
 import network.Network;
+import network.NetworkServer;
 import org.apache.log4j.Logger;
 
 public class Main {
@@ -14,9 +15,8 @@ public class Main {
         new ChatRoom("Python Programming"));
 
     logger.info("creating chat server");
-
-    Network network = new Network();
-    network.addNetworkListener(new ChatService(network, chat, ChatTranslator.translator()));
-    network.bind(9999);
+    NetworkServer server = new NetworkServer();
+    server.addListener(new ChatService(server, chat, ChatTranslator.translator()));
+    server.bind(9999);
   }
 }
