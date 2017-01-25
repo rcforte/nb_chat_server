@@ -2,16 +2,13 @@ package chat.client;
 
 import chat.common.Message;
 import com.google.common.collect.Maps;
-import network.Network;
 import network.NetworkClient;
-import network.NetworkEvent;
 import network.NetworkListener;
 import network.chat.ChatRoom;
 import network.chat.Translator;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.nio.channels.SocketChannel;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -25,10 +22,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
-import static network.NetworkEventType.CONNECT;
-import static network.NetworkEventType.READ;
 
-public class ChatClientImpl implements ChatClient, NetworkListener {
+public class ChatClientImpl implements ChatClient {
   private static final Logger logger = Logger.getLogger(ChatClientImpl.class);
   private static final long timeout = 5;
 
@@ -39,13 +34,22 @@ public class ChatClientImpl implements ChatClient, NetworkListener {
   private final Map<String, Processor> processors = Maps.newConcurrentMap();
   private final Translator<byte[], List<Message>> translator;
 
-  private SocketChannel channel;
-
   public ChatClientImpl(String host, int port, Translator<byte[], List<Message>> translator) {
     this.host = host;
     this.port = port;
     this.network = new NetworkClient();
-    this.network.addListener(this);
+    this.network.onRead(bytes -> {
+      List<Message> msgs = translator.from(bytes);
+      if (msgs != null && !msgs.isEmpty()) {
+        for (Message msg : msgs) {
+          if (msg.corrId() != null) {
+            notifyProcessor(msg);
+          } else {
+            notifyListeners(msg);
+          }
+        }
+      }
+    });
     this.translator = translator;
   }
 
@@ -108,7 +112,6 @@ public class ChatClientImpl implements ChatClient, NetworkListener {
 
   public void stop() {
     network.stop();
-    network.removeListener(this);
   }
 
   public void getChatRooms(Processor processor) {
@@ -118,7 +121,7 @@ public class ChatClientImpl implements ChatClient, NetworkListener {
   }
 
   private void send(Message msg) {
-    network.send(channel, translator.to(newArrayList(msg)));
+    network.send(translator.to(newArrayList(msg)));
   }
 
   public void getChatRoomUsers(String room, Processor processor) {
@@ -133,24 +136,6 @@ public class ChatClientImpl implements ChatClient, NetworkListener {
     checkArgument(processor != null, "processor cannot be null");
     processors.put(message.getCorrelationId(), processor);
     send(message);
-  }
-
-  @Override
-  public void onEvent(NetworkEvent event) {
-    if (event.type() == CONNECT) {
-      this.channel = event.channel();
-    } else if (event.type() == READ) {
-      List<Message> msgs = translator.from(event.getData());
-      if (msgs != null && !msgs.isEmpty()) {
-        for (Message msg : msgs) {
-          if (msg.corrId() != null) {
-            notifyProcessor(msg);
-          } else {
-            notifyListeners(msg);
-          }
-        }
-      }
-    }
   }
 
   private void notifyProcessor(Message msg) {
