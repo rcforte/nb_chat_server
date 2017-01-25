@@ -30,13 +30,12 @@ public class ChatTest {
     Chat chat = new Chat().rooms(rooms.toArray(new ChatRoom[]{}));
 
     // create a chat server
-    NetworkServer srv = new NetworkServer();
-    srv.addListener(new ChatService(srv, chat, translator()));
-    srv.bind(PORT);
+    NetworkServer server = new NetworkServer();
+    server.addListener(new ChatService(server, chat, translator()));
+    server.bind(PORT);
 
     // create a chat client
     BlockClient rafael = BlockClient.client(HOST, PORT);
-    ;
     rafael.addListener(msg -> rafaelMsgs.addAll(msg.get("message")));
 
     logger.info("Rafael is connecting");
@@ -98,7 +97,7 @@ public class ChatTest {
 
     // stop the server
     logger.info("stopping server");
-    srv.stop();
+    server.stop();
   }
 }
 

@@ -2,10 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ad08b55b-fe08-46e9-94b8-09c96718f28b" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/network/OnConnected.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/network/OnRead.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/maven-archiver/pom.properties" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/nb_chat_server-0.0.1-SNAPSHOT.jar" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/chat/client/ChatClient.class" afterPath="$PROJECT_DIR$/target/classes/chat/client/ChatClient.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/chat/client/ChatClientImpl.class" afterPath="$PROJECT_DIR$/target/classes/chat/client/ChatClientImpl.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/chat/client/ChatListener.class" afterPath="$PROJECT_DIR$/target/classes/chat/client/ChatListener.class" />
@@ -28,6 +24,8 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/network/NetworkEventType.class" afterPath="$PROJECT_DIR$/target/classes/network/NetworkEventType.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/network/NetworkListener.class" afterPath="$PROJECT_DIR$/target/classes/network/NetworkListener.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/network/NetworkServer.class" afterPath="$PROJECT_DIR$/target/classes/network/NetworkServer.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/network/OnConnected.class" afterPath="$PROJECT_DIR$/target/classes/network/OnConnected.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/network/OnRead.class" afterPath="$PROJECT_DIR$/target/classes/network/OnRead.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/network/SelectorHandler.class" afterPath="$PROJECT_DIR$/target/classes/network/SelectorHandler.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/network/SelectorListener.class" afterPath="$PROJECT_DIR$/target/classes/network/SelectorListener.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/network/SelectorLoop.class" afterPath="$PROJECT_DIR$/target/classes/network/SelectorLoop.class" />
@@ -91,6 +89,8 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/network/NetworkEventType.java" afterPath="$PROJECT_DIR$/src/main/java/network/NetworkEventType.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/network/NetworkListener.java" afterPath="$PROJECT_DIR$/src/main/java/network/NetworkListener.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/network/NetworkServer.java" afterPath="$PROJECT_DIR$/src/main/java/network/NetworkServer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/network/OnConnected.java" afterPath="$PROJECT_DIR$/src/main/java/network/OnConnected.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/network/OnRead.java" afterPath="$PROJECT_DIR$/src/main/java/network/OnRead.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/network/SelectorHandler.java" afterPath="$PROJECT_DIR$/src/main/java/network/SelectorHandler.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/network/SelectorListener.java" afterPath="$PROJECT_DIR$/src/main/java/network/SelectorListener.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/network/SelectorLoop.java" afterPath="$PROJECT_DIR$/src/main/java/network/SelectorLoop.java" />
@@ -160,11 +160,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="EchoServerTest.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/test/java/network/echo/EchoServerTest.java">
+      <file leaf-file-name="ChatClientImpl.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/chat/client/ChatClientImpl.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="496">
-              <caret line="57" column="51" lean-forward="false" selection-start-line="57" selection-start-column="51" selection-end-line="57" selection-end-column="51" />
+            <state relative-caret-position="3339">
+              <caret line="163" column="25" lean-forward="true" selection-start-line="163" selection-start-column="25" selection-end-line="163" selection-end-column="25" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -235,7 +235,6 @@
         <option value="$PROJECT_DIR$/src/main/java/chat/gui/Main.java" />
         <option value="$PROJECT_DIR$/src/main/java/network/chat/ChatTranslator.java" />
         <option value="$PROJECT_DIR$/src/main/java/network/chat/ChatListener.java" />
-        <option value="$PROJECT_DIR$/src/main/java/network/chat/ChatService.java" />
         <option value="$PROJECT_DIR$/src/main/java/chat/gui/ChatController.java" />
         <option value="$PROJECT_DIR$/src/main/java/chat/client/ChatClient.java" />
         <option value="$PROJECT_DIR$/src/main/java/network/chat/Chat.java" />
@@ -249,19 +248,20 @@
         <option value="$PROJECT_DIR$/src/main/java/network/Client.java" />
         <option value="$PROJECT_DIR$/src/main/java/network/Network.java" />
         <option value="$PROJECT_DIR$/src/main/java/network/NetworkClientNew.java" />
-        <option value="$PROJECT_DIR$/src/main/java/chat/client/ChatClientImpl.java" />
         <option value="$PROJECT_DIR$/src/main/java/network/chat/Main.java" />
         <option value="$PROJECT_DIR$/src/main/java/network/echo/EchoServer.java" />
         <option value="$PROJECT_DIR$/src/main/java/network/echo/EchoClient.java" />
         <option value="$PROJECT_DIR$/src/test/java/network/NetworkClientTest.java" />
         <option value="$PROJECT_DIR$/src/test/java/network/NetworkServerTest.java" />
-        <option value="$PROJECT_DIR$/src/test/java/network/chat/ChatTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/network/NetworkEvent.java" />
         <option value="$PROJECT_DIR$/src/main/java/network/OnRead.java" />
         <option value="$PROJECT_DIR$/src/main/java/network/OnConnected.java" />
-        <option value="$PROJECT_DIR$/src/main/java/network/NetworkClient.java" />
         <option value="$PROJECT_DIR$/src/main/java/network/NetworkServer.java" />
+        <option value="$PROJECT_DIR$/src/main/java/network/NetworkClient.java" />
         <option value="$PROJECT_DIR$/src/test/java/network/echo/EchoServerTest.java" />
+        <option value="$PROJECT_DIR$/src/main/java/network/chat/ChatService.java" />
+        <option value="$PROJECT_DIR$/src/test/java/network/chat/ChatTest.java" />
+        <option value="$PROJECT_DIR$/src/main/java/chat/client/ChatClientImpl.java" />
       </list>
     </option>
   </component>
@@ -629,7 +629,7 @@
       <recent name="C:\software\cygwin\home\Rafael\nb_chat_server\src\test\resources" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.EchoServerTest.newWay">
+  <component name="RunManager" selected="Maven.nb_chat_server">
     <configuration default="false" name="ChatTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
@@ -1294,7 +1294,7 @@
       <workItem from="1485208094689" duration="1169000" />
       <workItem from="1485212291590" duration="23000" />
       <workItem from="1485212366659" duration="12791000" />
-      <workItem from="1485279750422" duration="24949000" />
+      <workItem from="1485279750422" duration="27370000" />
     </task>
     <servers />
   </component>
@@ -1314,11 +1314,11 @@
     <history-entry file="EchoServerTest_newWay - 2017.01.24 at 20h 33m 26s.xml">
       <configuration name="EchoServerTest.newWay" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="EchoServerTest_simple - 2017.01.24 at 20h 12m 25s.xml">
-      <configuration name="EchoServerTest.simple" configurationId="JUnit" />
+    <history-entry file="EchoServerTest_newWay - 2017.01.24 at 20h 36m 51s.xml">
+      <configuration name="EchoServerTest.newWay" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="EchoServerTest_simple - 2017.01.24 at 20h 12m 37s.xml">
-      <configuration name="EchoServerTest.simple" configurationId="JUnit" />
+    <history-entry file="EchoServerTest_newWay - 2017.01.24 at 20h 38m 03s.xml">
+      <configuration name="EchoServerTest.newWay" configurationId="JUnit" />
     </history-entry>
     <history-entry file="EchoServerTest_simple - 2017.01.24 at 20h 14m 20s.xml">
       <configuration name="EchoServerTest.simple" configurationId="JUnit" />
@@ -1331,7 +1331,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="95263000" />
+    <option name="totallyTimeSpent" value="97684000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1356,7 +1356,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32932165" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32932165" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Properties" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1683,23 +1683,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/network/chat/ChatService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="324">
-          <caret line="59" column="12" lean-forward="false" selection-start-line="59" selection-start-column="12" selection-end-line="59" selection-end-column="12" />
-          <folding>
-            <marker date="1485292408137" expanded="true" signature="30:397" ph="..." />
-            <marker date="1485292408137" expanded="true" signature="648:737" ph="{...}" />
-            <marker date="1485292408137" expanded="true" signature="793:1207" ph="{...}" />
-            <marker date="1485292408137" expanded="true" signature="1266:1755" ph="{...}" />
-            <marker date="1485292408137" expanded="true" signature="1796:1803" ph=" { " />
-            <marker date="1485292408137" expanded="true" signature="1862:1866" ph=" }" />
-            <marker date="1485292408137" expanded="false" signature="1915:1922" ph=" { " />
-            <marker date="1485292408137" expanded="false" signature="1978:1982" ph=" }" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/network/chat/Chat.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="228">
@@ -1790,35 +1773,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/network/chat/BlockClient.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="304">
-          <caret line="29" column="28" lean-forward="false" selection-start-line="29" selection-start-column="28" selection-end-line="29" selection-end-column="28" />
-          <folding>
-            <marker date="1485302527509" expanded="true" signature="30:653" ph="..." />
-            <marker date="1485302527509" expanded="true" signature="655:697" ph="/**...*/" />
-            <marker date="1485302527509" expanded="true" signature="915:994" ph="{...}" />
-            <marker date="1485302527509" expanded="true" signature="1173:1484" ph="{...}" />
-            <marker date="1485302527509" expanded="false" signature="1542:1549" ph=" { " />
-            <marker date="1485302527509" expanded="false" signature="1574:1578" ph=" }" />
-            <marker date="1485302527509" expanded="false" signature="1639:1646" ph=" { " />
-            <marker date="1485302527509" expanded="false" signature="1674:1678" ph=" }" />
-            <marker date="1485302527509" expanded="false" signature="1746:1753" ph=" { " />
-            <marker date="1485302527509" expanded="false" signature="1785:1789" ph=" }" />
-            <marker date="1485302527509" expanded="false" signature="1860:1867" ph=" { " />
-            <marker date="1485302527509" expanded="false" signature="1902:1906" ph=" }" />
-            <marker date="1485302527509" expanded="true" signature="1963:2012" ph="{...}" />
-            <marker date="1485302527509" expanded="true" signature="2071:2124" ph="{...}" />
-            <marker date="1485302527509" expanded="true" signature="2202:2267" ph="{...}" />
-            <marker date="1485302527509" expanded="false" signature="2313:2320" ph=" { " />
-            <marker date="1485302527509" expanded="false" signature="2339:2343" ph=" }" />
-            <marker date="1485302527509" expanded="false" signature="2395:2402" ph=" { " />
-            <marker date="1485302527509" expanded="false" signature="2431:2435" ph=" }" />
-            <marker date="1485302527509" expanded="true" signature="2475:2713" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/network/SelectorLoop.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="344">
@@ -1874,54 +1828,15 @@
         <state relative-caret-position="891">
           <caret line="38" column="0" lean-forward="false" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
           <folding>
-            <marker date="1485307395250" expanded="true" signature="25:468" ph="..." />
-            <marker date="1485307395250" expanded="true" signature="470:512" ph="/**...*/" />
-            <marker date="1485307395250" expanded="true" signature="774:1013" ph="{...}" />
-            <marker date="1485307395250" expanded="true" signature="1079:1642" ph="{...}" />
-            <marker date="1485307395250" expanded="true" signature="1675:1682" ph=" { " />
-            <marker date="1485307395250" expanded="true" signature="1702:1706" ph=" }" />
-            <marker date="1485307395250" expanded="true" signature="1748:1911" ph="{...}" />
-            <marker date="1485307395250" expanded="true" signature="1968:1975" ph=" { " />
-            <marker date="1485307395250" expanded="true" signature="1999:2003" ph=" }" />
-            <marker date="1485307395250" expanded="true" signature="2048:2055" ph=" { " />
-            <marker date="1485307395250" expanded="true" signature="2074:2078" ph=" }" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/chat/client/ChatClientImpl.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="361">
-          <caret line="36" column="29" lean-forward="false" selection-start-line="36" selection-start-column="29" selection-end-line="36" selection-end-column="29" />
-          <folding>
-            <marker date="1485305336896" expanded="true" signature="29:983" ph="..." />
-            <marker date="1485305336896" expanded="true" signature="1613:1772" ph="{...}" />
-            <marker date="1485305336896" expanded="false" signature="1830:1837" ph=" { " />
-            <marker date="1485305336896" expanded="false" signature="1857:1861" ph=" }" />
-            <marker date="1485305336896" expanded="false" signature="1922:1929" ph=" { " />
-            <marker date="1485305336896" expanded="false" signature="1952:1956" ph=" }" />
-            <marker date="1485305336896" expanded="false" signature="2024:2031" ph=" { " />
-            <marker date="1485305336896" expanded="false" signature="2057:2061" ph=" }" />
-            <marker date="1485305336896" expanded="false" signature="2132:2139" ph=" { " />
-            <marker date="1485305336896" expanded="false" signature="2168:2172" ph=" }" />
-            <marker date="1485305336896" expanded="true" signature="2229:2267" ph="{...}" />
-            <marker date="1485305336896" expanded="false" signature="2325:2332" ph=" { " />
-            <marker date="1485305336896" expanded="false" signature="2390:2394" ph=" }" />
-            <marker date="1485305336896" expanded="true" signature="2476:2572" ph="{...}" />
-            <marker date="1485305336896" expanded="false" signature="2618:2625" ph=" { " />
-            <marker date="1485305336896" expanded="false" signature="2665:2669" ph=" }" />
-            <marker date="1485305336896" expanded="true" signature="2722:3160" ph="{...}" />
-            <marker date="1485305336896" expanded="true" signature="3183:3242" ph="{...}" />
-            <marker date="1485305336896" expanded="true" signature="3292:3424" ph="{...}" />
-            <marker date="1485305336896" expanded="false" signature="3458:3465" ph=" { " />
-            <marker date="1485305336896" expanded="false" signature="3521:3525" ph=" }" />
-            <marker date="1485305336896" expanded="true" signature="3592:3752" ph="{...}" />
-            <marker date="1485305336896" expanded="true" signature="3811:4119" ph="{...}" />
-            <marker date="1485305336896" expanded="true" signature="4175:4597" ph="{...}" />
-            <marker date="1485305336896" expanded="true" signature="4643:4855" ph="{...}" />
-            <marker date="1485305336896" expanded="true" signature="4901:4983" ph="{...}" />
-            <marker date="1485305336896" expanded="false" signature="5010:5017" ph=" { " />
-            <marker date="1485305336896" expanded="false" signature="5053:5057" ph=" }" />
+            <marker date="1485308207563" expanded="true" signature="25:468" ph="..." />
+            <marker date="1485308207563" expanded="true" signature="470:512" ph="/**...*/" />
+            <marker date="1485308207563" expanded="true" signature="774:1013" ph="{...}" />
+            <marker date="1485308207563" expanded="true" signature="1079:1642" ph="{...}" />
+            <marker date="1485308207563" expanded="true" signature="1675:1682" ph=" { " />
+            <marker date="1485308207563" expanded="true" signature="1702:1706" ph=" }" />
+            <marker date="1485308207563" expanded="true" signature="1748:1911" ph="{...}" />
+            <marker date="1485308207563" expanded="true" signature="1978:2029" ph="{...}" />
+            <marker date="1485308207563" expanded="true" signature="2084:2130" ph="{...}" />
           </folding>
         </state>
       </provider>
@@ -2102,38 +2017,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/network/NetworkClient.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="21" column="2" lean-forward="false" selection-start-line="21" selection-start-column="2" selection-end-line="21" selection-end-column="2" />
-          <folding>
-            <marker date="1485307395250" expanded="true" signature="25:468" ph="..." />
-            <marker date="1485307395250" expanded="true" signature="470:512" ph="/**...*/" />
-            <marker date="1485307395250" expanded="true" signature="774:1013" ph="{...}" />
-            <marker date="1485307395250" expanded="true" signature="1079:1642" ph="{...}" />
-            <marker date="1485307395250" expanded="true" signature="1675:1682" ph=" { " />
-            <marker date="1485307395250" expanded="true" signature="1702:1706" ph=" }" />
-            <marker date="1485307395250" expanded="true" signature="1748:1911" ph="{...}" />
-            <marker date="1485307395250" expanded="true" signature="1968:1975" ph=" { " />
-            <marker date="1485307395250" expanded="true" signature="1999:2003" ph=" }" />
-            <marker date="1485307395250" expanded="true" signature="2048:2055" ph=" { " />
-            <marker date="1485307395250" expanded="true" signature="2074:2078" ph=" }" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/network/chat/ChatTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1188">
-          <caret line="101" column="3" lean-forward="true" selection-start-line="101" selection-start-column="3" selection-end-line="101" selection-end-column="3" />
-          <folding>
-            <marker date="1485305588099" expanded="true" signature="30:336" ph="..." />
-            <marker date="1485305588099" expanded="true" signature="338:444" ph="//..." />
-            <marker date="1485305588099" expanded="true" signature="689:3117" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/network/NetworkServer.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="435">
@@ -2150,10 +2033,99 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/network/NetworkClient.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="387">
+          <caret line="76" column="16" lean-forward="false" selection-start-line="76" selection-start-column="16" selection-end-line="76" selection-end-column="16" />
+          <folding>
+            <marker date="1485308207563" expanded="true" signature="25:468" ph="..." />
+            <marker date="1485308207563" expanded="true" signature="470:512" ph="/**...*/" />
+            <marker date="1485308207563" expanded="true" signature="774:1013" ph="{...}" />
+            <marker date="1485308207563" expanded="true" signature="1079:1642" ph="{...}" />
+            <marker date="1485308207563" expanded="true" signature="1675:1682" ph=" { " />
+            <marker date="1485308207563" expanded="true" signature="1702:1706" ph=" }" />
+            <marker date="1485308207563" expanded="true" signature="1748:1911" ph="{...}" />
+            <marker date="1485308207563" expanded="true" signature="1978:2029" ph="{...}" />
+            <marker date="1485308207563" expanded="true" signature="2084:2130" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/network/echo/EchoServerTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="496">
-          <caret line="57" column="51" lean-forward="false" selection-start-line="57" selection-start-column="51" selection-end-line="57" selection-end-column="51" />
+        <state relative-caret-position="504">
+          <caret line="42" column="0" lean-forward="true" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+          <folding>
+            <marker date="1485319645088" expanded="true" signature="30:389" ph="..." />
+            <marker date="1485319645088" expanded="true" signature="391:433" ph="/**...*/" />
+            <marker date="1485319645088" expanded="true" signature="513:913" ph="{...}" />
+            <marker date="1485319645088" expanded="true" signature="963:1448" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/network/chat/ChatService.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="483">
+          <caret line="44" column="33" lean-forward="true" selection-start-line="44" selection-start-column="33" selection-end-line="44" selection-end-column="33" />
+          <folding>
+            <marker date="1485320002502" expanded="true" signature="30:397" ph="..." />
+            <marker date="1485320002502" expanded="true" signature="648:737" ph="{...}" />
+            <marker date="1485320002502" expanded="true" signature="791:1109" ph="{...}" />
+            <marker date="1485320002502" expanded="true" signature="1161:1635" ph="{...}" />
+            <marker date="1485320002502" expanded="true" signature="1676:1683" ph=" { " />
+            <marker date="1485320002502" expanded="true" signature="1742:1746" ph=" }" />
+            <marker date="1485320002502" expanded="false" signature="1795:1802" ph=" { " />
+            <marker date="1485320002502" expanded="false" signature="1858:1862" ph=" }" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/network/chat/ChatTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="363">
+          <caret line="37" column="8" lean-forward="false" selection-start-line="37" selection-start-column="8" selection-end-line="37" selection-end-column="8" />
+          <folding>
+            <marker date="1485320462368" expanded="true" signature="30:336" ph="..." />
+            <marker date="1485320462368" expanded="true" signature="338:444" ph="//..." />
+            <marker date="1485320462368" expanded="true" signature="689:3126" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/network/chat/BlockClient.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="324">
+          <caret line="30" column="31" lean-forward="false" selection-start-line="30" selection-start-column="31" selection-end-line="30" selection-end-column="31" />
+          <folding>
+            <marker date="1485302527509" expanded="true" signature="30:653" ph="..." />
+            <marker date="1485302527509" expanded="true" signature="655:697" ph="/**...*/" />
+            <marker date="1485302527509" expanded="true" signature="915:994" ph="{...}" />
+            <marker date="1485302527509" expanded="true" signature="1173:1484" ph="{...}" />
+            <marker date="1485302527509" expanded="false" signature="1542:1549" ph=" { " />
+            <marker date="1485302527509" expanded="false" signature="1574:1578" ph=" }" />
+            <marker date="1485302527509" expanded="false" signature="1639:1646" ph=" { " />
+            <marker date="1485302527509" expanded="false" signature="1674:1678" ph=" }" />
+            <marker date="1485302527509" expanded="false" signature="1746:1753" ph=" { " />
+            <marker date="1485302527509" expanded="false" signature="1785:1789" ph=" }" />
+            <marker date="1485302527509" expanded="false" signature="1860:1867" ph=" { " />
+            <marker date="1485302527509" expanded="false" signature="1902:1906" ph=" }" />
+            <marker date="1485302527509" expanded="true" signature="1963:2012" ph="{...}" />
+            <marker date="1485302527509" expanded="true" signature="2071:2124" ph="{...}" />
+            <marker date="1485302527509" expanded="true" signature="2202:2267" ph="{...}" />
+            <marker date="1485302527509" expanded="false" signature="2313:2320" ph=" { " />
+            <marker date="1485302527509" expanded="false" signature="2339:2343" ph=" }" />
+            <marker date="1485302527509" expanded="false" signature="2395:2402" ph=" { " />
+            <marker date="1485302527509" expanded="false" signature="2431:2435" ph=" }" />
+            <marker date="1485302527509" expanded="true" signature="2475:2713" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/chat/client/ChatClientImpl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3339">
+          <caret line="163" column="25" lean-forward="true" selection-start-line="163" selection-start-column="25" selection-end-line="163" selection-end-column="25" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

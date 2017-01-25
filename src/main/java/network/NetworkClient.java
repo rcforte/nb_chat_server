@@ -67,12 +67,14 @@ public class NetworkClient extends Network {
     }
   }
 
-  public void onConnected(Consumer<SocketChannel> func) {
+  public NetworkClient onConnected(Consumer<SocketChannel> func) {
     this.onConnected = func;
+    return this;
   }
 
-  public void onRead(Consumer<byte[]> func) {
+  public NetworkClient onRead(Consumer<byte[]> func) {
     this.onRead = func;
+    return this;
   }
 }
 

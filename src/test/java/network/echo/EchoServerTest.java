@@ -1,21 +1,13 @@
 package network.echo;
 
-import chat.common.Message;
-import network.Network;
 import network.NetworkClient;
 import network.NetworkServer;
-import network.chat.ChatTranslator;
 import org.junit.Test;
 
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.TimeUnit;
 
-import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static network.NetworkEventType.CONNECT;
-import static network.NetworkEventType.READ;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -56,6 +48,9 @@ public class EchoServerTest {
     cli.connect("localhost", 9999);
 
     assertThat(queue.poll(1, SECONDS), equalTo("test"));
+
+    cli.stop();
+    srv.stop();
   }
 }
 

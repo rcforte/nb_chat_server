@@ -25,32 +25,29 @@ public class ChatService implements NetworkListener {
   }
 
   @Override
-  public void onEvent(NetworkEvent event) {
+  public void onEvent(NetworkEvent evt) {
     List<Message> msgs = null;
-    if (event.getType() == DISCONNECT) {
+    if (evt.type() == DISCONNECT) {
       msgs = newArrayList(new Message(LEAVE));
-    } else if (event.getType() == READ) {
-      msgs = translator.from(event.getData());
+    } else if (evt.type() == READ) {
+      msgs = translator.from(evt.getData());
     }
 
     if (msgs != null) {
-      msgs.stream().forEach(message -> {
-        Command command = getCommand(event.getSocketChannel(), message);
-        command.execute(chat, message);
-      });
+      msgs.stream().forEach(msg -> cmd(evt.channel(), msg).execute(chat, msg));
     }
   }
 
-  Command getCommand(SocketChannel channel, Message msg) {
-    if (msg.getType() == GET_ROOMS) {
+  Command cmd(SocketChannel channel, Message msg) {
+    if (msg.type() == GET_ROOMS) {
       return new GetRoomsCommand(this, channel);
-    } else if (msg.getType() == GET_ROOM_USERS) {
+    } else if (msg.type() == GET_ROOM_USERS) {
       return new GetUsersCommand(this, channel);
-    } else if (msg.getType() == JOIN) {
+    } else if (msg.type() == JOIN) {
       return new JoinRoomCommand(this, channel);
-    } else if (msg.getType() == MESSAGE) {
+    } else if (msg.type() == MESSAGE) {
       return new SendMessageCommand(this, channel);
-    } else if (msg.getType() == LEAVE) {
+    } else if (msg.type() == LEAVE) {
       return new LeaveRoomCommand(this, channel);
     }
     return null;

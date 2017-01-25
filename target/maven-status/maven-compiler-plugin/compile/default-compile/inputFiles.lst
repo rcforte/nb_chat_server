@@ -1,3 +1,4 @@
+C:\software\cygwin\home\Rafael\nb_chat_server\src\main\java\network\OnRead.java
 C:\software\cygwin\home\Rafael\nb_chat_server\src\main\java\network\chat\ChatUser.java
 C:\software\cygwin\home\Rafael\nb_chat_server\src\main\java\network\MessageListener.java
 C:\software\cygwin\home\Rafael\nb_chat_server\src\main\java\network\SelectorListener.java
@@ -27,6 +28,7 @@ C:\software\cygwin\home\Rafael\nb_chat_server\src\main\java\chat\gui\Main.java
 C:\software\cygwin\home\Rafael\nb_chat_server\src\main\java\network\chat\LeaveRoomCommand.java
 C:\software\cygwin\home\Rafael\nb_chat_server\src\main\java\chat\gui\ChatModel.java
 C:\software\cygwin\home\Rafael\nb_chat_server\src\main\java\chat\common\Message.java
+C:\software\cygwin\home\Rafael\nb_chat_server\src\main\java\network\OnConnected.java
 C:\software\cygwin\home\Rafael\nb_chat_server\src\main\java\chat\common\MessageType.java
 C:\software\cygwin\home\Rafael\nb_chat_server\src\main\java\chat\gui\ChatController.java
 C:\software\cygwin\home\Rafael\nb_chat_server\src\main\java\network\chat\ChatMessage.java

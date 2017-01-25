@@ -9,6 +9,7 @@ chat\common\Message.class
 network\echo\EchoServer.class
 network\chat\ChatService.class
 network\SelectorListener.class
+network\OnConnected.class
 chat\client\Processor.class
 network\chat\ChatTranslator.class
 network\NetworkEvent.class
@@ -37,6 +38,7 @@ network\echo\EchoClient.class
 network\Network$1.class
 chat\gui\ChatView.class
 network\NetworkEventType.class
+network\OnRead.class
 network\MessageListener.class
 network\StringDecoder.class
 chat\gui\Main.class

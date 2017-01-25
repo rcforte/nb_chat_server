@@ -139,7 +139,7 @@ public class ChatClientImpl implements ChatClient, NetworkListener {
   public void onEvent(NetworkEvent event) {
     if (event.type() == CONNECT) {
       this.channel = event.channel();
-    } else if (event.getType() == READ) {
+    } else if (event.type() == READ) {
       List<Message> msgs = translator.from(event.getData());
       if (msgs != null && !msgs.isEmpty()) {
         for (Message msg : msgs) {
