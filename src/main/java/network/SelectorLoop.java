@@ -11,16 +11,17 @@ import java.util.Iterator;
  * Created by Rafael on 1/16/2017.
  */
 class SelectorLoop {
-
   private static final Logger logger = Logger.getLogger(SelectorLoop.class);
+
   private final Selector selector;
-  private final SelectorListener selectorListener;
-  private final Handler handler;
+  private final SelectorListener listener;
+  private final SelectorHandler handler;
+
   private volatile boolean stopped;
 
-  public SelectorLoop(Selector selector, SelectorListener selectorListener, Handler handler) {
+  public SelectorLoop(Selector selector, SelectorListener listener, SelectorHandler handler) {
     this.selector = selector;
-    this.selectorListener = selectorListener;
+    this.listener = listener;
     this.handler = handler;
   }
 
@@ -45,11 +46,11 @@ class SelectorLoop {
       logger.error("Error closing selector", e);
     }
 
-    selectorListener.onClosed();
+    listener.onClosed();
   }
 
   void select() throws IOException {
-    selectorListener.onBeforeSelect();
+    listener.onBeforeSelect();
 
     int n = selector.select(100L);
     if (n == 0) {

@@ -37,6 +37,7 @@ public class NetworkServer extends Network {
 
     selector = Selector.open();
     selectorLoop = new SelectorLoop(selector, selectorListener, handler);
+
     channel = ServerSocketChannel.open();
     channel.configureBlocking(false);
     channel.register(selector, SelectionKey.OP_ACCEPT);
@@ -54,6 +55,7 @@ public class NetworkServer extends Network {
   @Override
   protected void stopImpl(){
     super.stopImpl();
+
     if (channel != null) {
       try {
         channel.close();

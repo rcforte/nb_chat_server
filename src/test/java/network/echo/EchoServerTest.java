@@ -18,25 +18,7 @@ import static org.junit.Assert.assertThat;
 public class EchoServerTest {
 
   @Test
-  public void oldWay() throws Exception {
-    BlockingQueue<String> queue = new LinkedBlockingDeque<>();
-
-    EchoServer server = new EchoServer(9999);
-    server.start();
-
-    EchoClient client = new EchoClient("localhost", 9999);
-    client.addMessageListener(message -> queue.add(message));
-    client.connect();
-    client.send("Test");
-
-    assertEquals("Test", queue.poll(2, SECONDS));
-
-    client.disconnect();
-    server.stop();
-  }
-
-  @Test
-  public void newWay() throws Exception {
+  public void echo() throws Exception {
     NetworkServer srv = new NetworkServer();
     srv.onRead((channel, bytes) -> srv.send(channel, bytes));
     srv.bind(9999);

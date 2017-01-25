@@ -29,6 +29,11 @@ public class Network {
 
   private final List<NetworkListener> listeners = Lists.newCopyOnWriteArrayList();
 
+  protected Selector selector;
+  protected SelectorLoop selectorLoop;
+  protected final ExecutorService executor = Executors.newSingleThreadExecutor();
+  protected final SelectorHandler handler = new SelectorHandler(this);
+  protected final Map<SocketChannel, Queue<ByteBuffer>> queues = Maps.newConcurrentMap();
   protected final SelectorListener selectorListener = new SelectorListener() {
     @Override
     public void onClosed() {
@@ -39,11 +44,6 @@ public class Network {
       checkWrites();
     }
   };
-  protected final ExecutorService executor = Executors.newSingleThreadExecutor();
-  protected final SelectorHandler handler = new SelectorHandler(this);
-  protected final Map<SocketChannel, Queue<ByteBuffer>> writeQueues = Maps.newConcurrentMap();
-  protected Selector selector;
-  protected SelectorLoop selectorLoop;
 
   public void stop() {
     logger.info("requesting stop...");
@@ -52,11 +52,11 @@ public class Network {
 
   protected void stopImpl() {
     try {
-      for (SocketChannel channel : writeQueues.keySet()) {
+      for (SocketChannel channel : queues.keySet()) {
         channel.close();
       }
     } catch (Exception e) {
-      logger.error("Error closing the writeQueues", e);
+      logger.error("Error closing the queues", e);
     }
   }
 
@@ -80,18 +80,18 @@ public class Network {
   public void send(SocketChannel channel, byte[] data) {
     checkArgument(channel != null, "channel cannot be null");
     checkArgument(data != null, "data cannot be null");
-    Queue<ByteBuffer> queue = writeQueues.get(channel);
+    Queue<ByteBuffer> queue = queues.get(channel);
     queue.add(ByteBuffer.wrap(data));
   }
 
   public void broadcast(byte[] data) {
     checkArgument(data != null, "data cannot be null");
     checkArgument(data.length > 0, "data cannot be empty");
-    writeQueues.keySet().stream().forEach(channel -> send(channel, data));
+    queues.keySet().stream().forEach(channel -> send(channel, data));
   }
 
   void addSocket(SocketChannel channel) {
-    writeQueues.put(channel, newArrayDeque());
+    queues.put(channel, newArrayDeque());
   }
 
   void handleEvent(NetworkEvent event) throws IOException {
@@ -105,7 +105,7 @@ public class Network {
       disconnect(event.channel());
     } else if (event.type() == READ) {
       // Do nothing
-    } else if (event.getType() == NetworkEventType.WRITE) {
+    } else if (event.type() == WRITE) {
       // Do nothing
     }
 
@@ -115,11 +115,11 @@ public class Network {
   public void disconnect(SocketChannel channel) throws IOException {
     channel.keyFor(selector).cancel();
     channel.close();
-    writeQueues.remove(channel);
+    queues.remove(channel);
   }
 
   public void sendBytes(SocketChannel channel) throws IOException {
-    Queue<ByteBuffer> queue = writeQueues.get(channel);
+    Queue<ByteBuffer> queue = queues.get(channel);
     ByteBuffer buffer = queue.peek();
     channel.write(buffer);
     if (buffer.hasRemaining()) {
@@ -133,7 +133,7 @@ public class Network {
   }
 
   public byte[] receiveBytes(SocketChannel channel) {
-    int n = 0;
+    int n;
     byte[] result = null;
 
     try {
@@ -171,7 +171,7 @@ public class Network {
   }
 
   private void checkWrites() {
-    for (Map.Entry<SocketChannel, Queue<ByteBuffer>> entry : writeQueues.entrySet()) {
+    for (Map.Entry<SocketChannel, Queue<ByteBuffer>> entry : queues.entrySet()) {
       Queue<ByteBuffer> queue = entry.getValue();
       if (!queue.isEmpty()) {
         SocketChannel socketChannel = entry.getKey();

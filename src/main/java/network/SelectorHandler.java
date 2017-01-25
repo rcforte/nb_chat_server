@@ -10,7 +10,7 @@ import java.nio.channels.SocketChannel;
 /**
  * Created by Rafael on 1/15/2017.
  */
-class SelectorHandler implements Handler {
+class SelectorHandler {
   private static final Logger logger = Logger.getLogger(SelectorHandler.class);
   private final Network network;
 
