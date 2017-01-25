@@ -42,4 +42,16 @@ public class NetworkEvent {
   public void setData(byte[] data) {
     this.data = data;
   }
+
+  public NetworkEventType type() {
+    return getType();
+  }
+
+  public byte[] data() {
+    return getData();
+  }
+
+  public SocketChannel channel() {
+    return getSocketChannel();
+  }
 }

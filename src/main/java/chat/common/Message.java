@@ -22,6 +22,10 @@ public class Message {
     return new Message(type, corrId);
   }
 
+  public static final Message message(MessageType type) {
+    return new Message(type, null);
+  }
+
   private final MessageType type;
   private final String correlationId;
   private final Map<String, List<String>> attrs = Maps.newHashMap();
@@ -34,7 +38,6 @@ public class Message {
   public Message(MessageType type) {
     this(type, null);
   }
-
 
   public MessageType getType() {
     return type;

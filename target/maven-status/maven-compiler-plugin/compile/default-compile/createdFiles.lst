@@ -1,11 +1,13 @@
 network\chat\JoinRoomCommand.class
 chat\client\ChatListener.class
 network\NetworkClient.class
+chat\client\ChatClientImpl.class
 network\chat\GetRoomsCommand.class
 network\chat\GetUsersCommand.class
 chat\gui\ChatModelListener.class
 chat\common\Message.class
 network\echo\EchoServer.class
+network\chat\ChatService.class
 network\SelectorListener.class
 chat\client\Processor.class
 network\chat\ChatTranslator.class
@@ -26,7 +28,6 @@ network\chat\Command.class
 chat\gui\ChatController.class
 network\chat\LeaveRoomCommand.class
 chat\gui\ChatModel.class
-network\chat\ChatListener.class
 network\SelectorHandler.class
 network\chat\Chat.class
 network\SelectorLoop.class

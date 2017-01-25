@@ -34,7 +34,7 @@ public class Chat {
     return rooms.values().stream().collect(Collectors.toList());
   }
 
-  public void join(SocketChannel channel, String user, String room) {
+  public void join(SocketChannel channel, String room, String user) {
     rooms.get(room).user(user, channel);
   }
 

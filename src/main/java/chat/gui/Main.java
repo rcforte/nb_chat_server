@@ -1,6 +1,6 @@
 package chat.gui;
 
-import chat.client.ChatClient;
+import chat.client.ChatClientImpl;
 import network.chat.ChatTranslator;
 import org.apache.log4j.Logger;
 
@@ -13,7 +13,7 @@ public class Main {
   public static void main(String[] args) {
     SwingUtilities.invokeLater(() -> {
       try {
-        ChatClient client = new ChatClient("localhost", 9999, ChatTranslator.translator());
+        ChatClientImpl client = new ChatClientImpl("localhost", 9999, ChatTranslator.translator());
         client.connect();
 
         ChatModel model = new ChatModel();

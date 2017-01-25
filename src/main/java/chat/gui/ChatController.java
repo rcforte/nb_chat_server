@@ -1,11 +1,10 @@
 package chat.gui;
 
-import chat.client.ChatClient;
+import chat.client.ChatClientImpl;
 import org.apache.log4j.Logger;
 
 import javax.swing.*;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -16,12 +15,12 @@ class ChatController {
   private static final Logger logger = Logger.getLogger(ChatController.class);
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
   private final ChatModel chatModel;
-  private final ChatClient chatClient;
+  private final ChatClientImpl chatClient;
 
-  public ChatController(ChatModel chatModel, ChatClient chatClient) {
+  public ChatController(ChatModel chatModel, ChatClientImpl chatClient) {
     this.chatModel = chatModel;
     this.chatClient = chatClient;
-    this.chatClient.addChatListener(responseMessage -> {
+    this.chatClient.addListener(responseMessage -> {
       List<String> messages = responseMessage.get("message");
       logger.info("received response: " + messages);
       for (String message : messages) {

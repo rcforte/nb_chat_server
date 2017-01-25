@@ -1,3 +1,4 @@
+network\chat\BlockClient.class
 network\chat\ChatTest.class
 network\NetworkClientTest.class
 network\NetworkServerTest.class
