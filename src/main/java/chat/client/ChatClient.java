@@ -1,7 +1,7 @@
 package chat.client;
 
 import network.NetworkListener;
-import network.chat.ChatRoom;
+import chat.server.ChatRoom;
 
 import java.io.IOException;
 import java.util.List;

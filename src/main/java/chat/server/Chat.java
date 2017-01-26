@@ -1,8 +1,7 @@
-package network.chat;
+package chat.server;
 
 import com.google.common.collect.Maps;
 import network.Network;
-import org.apache.log4j.Logger;
 
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;

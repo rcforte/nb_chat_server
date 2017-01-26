@@ -1,14 +1,13 @@
-package network.chat;
+package chat.server;
 
 import chat.common.Message;
 import network.StringDecoder;
 import network.StringEncoder;
+import network.Translator;
 
 import java.util.List;
 import java.util.function.Function;
 
-import static chat.common.Message.from;
-import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -24,26 +23,24 @@ public class ChatTranslator implements Translator<byte[], List<Message>> {
     Function<List<Message>, List<String>> msgToStr = msgs -> msgs.stream().map(Message::json).collect(toList());
     Function<List<Message>, byte[]> to = new StringEncoder("\n").compose(msgToStr);
 
-    return new ChatTranslator(from,to);
+    return new ChatTranslator(from, to);
   }
 
-  private Function<byte[], List<Message>> from;
-  private Function<List<Message>, byte[]> to;
+  private final Function<byte[], List<Message>> from;
+  private final Function<List<Message>, byte[]> to;
 
   public ChatTranslator(Function<byte[], List<Message>> from, Function<List<Message>, byte[]> to) {
     this.from = from;
     this.to = to;
   }
 
+  @Override
   public List<Message> from(byte[] bytes) {
     return from.apply(bytes);
   }
 
+  @Override
   public byte[] to(List<Message> msgs) {
     return to.apply(msgs);
-  }
-
-  public byte[] to(Message msg) {
-    return to(newArrayList(msg));
   }
 }

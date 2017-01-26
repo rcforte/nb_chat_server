@@ -1,7 +1,7 @@
 package chat.gui;
 
 import chat.client.ChatClientImpl;
-import network.chat.ChatTranslator;
+import chat.server.ChatTranslator;
 import org.apache.log4j.Logger;
 
 import javax.swing.*;

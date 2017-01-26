@@ -1,5 +1,8 @@
-package network.chat;
+package chat;
 
+import chat.server.Chat;
+import chat.server.ChatRoom;
+import chat.server.ChatService;
 import network.NetworkServer;
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -8,7 +11,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static network.NetworkEventType.READ;
-import static network.chat.ChatTranslator.translator;
+import static chat.server.ChatTranslator.translator;
 import static org.junit.Assert.assertEquals;
 
 // Make blocking a decorator

@@ -1,6 +1,5 @@
-package network.chat;
+package chat.server;
 
-import network.Network;
 import network.NetworkServer;
 import org.apache.log4j.Logger;
 

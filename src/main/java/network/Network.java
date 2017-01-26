@@ -174,8 +174,7 @@ public class Network {
     for (Map.Entry<SocketChannel, Queue<ByteBuffer>> entry : queues.entrySet()) {
       Queue<ByteBuffer> queue = entry.getValue();
       if (!queue.isEmpty()) {
-        SocketChannel socketChannel = entry.getKey();
-        socketChannel.keyFor(selector).interestOps(SelectionKey.OP_WRITE);
+        entry.getKey().keyFor(selector).interestOps(SelectionKey.OP_WRITE);
       }
     }
   }

@@ -1,4 +1,4 @@
-package network.chat;
+package chat.server;
 
 import network.Network;
 

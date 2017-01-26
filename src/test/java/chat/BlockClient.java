@@ -1,8 +1,9 @@
-package network.chat;
+package chat;
 
 import chat.client.ChatClient;
 import chat.client.ChatClientImpl;
 import chat.client.ChatListener;
+import chat.server.ChatRoom;
 import com.google.common.collect.Maps;
 import network.NetworkEvent;
 import network.NetworkEventType;
@@ -18,7 +19,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static network.NetworkEventType.CONNECT;
 import static network.NetworkEventType.READ;
-import static network.chat.ChatTranslator.translator;
+import static chat.server.ChatTranslator.translator;
 
 /**
  * Created by Rafael on 1/24/2017.
@@ -95,13 +96,13 @@ class BlockClient implements ChatClient {
   }
 
   void consume(NetworkEventType type) {
-    NetworkEvent evt;
+    NetworkEvent event;
     try {
-      evt = events.get(type).poll(TIMEOUT, SECONDS);
+      event = events.get(type).poll(TIMEOUT, SECONDS);
     } catch (InterruptedException e) {
-      evt = null;
+      event = null;
     }
-    if (evt == null) {
+    if (event == null) {
       throw new RuntimeException("event not received");
     }
   }

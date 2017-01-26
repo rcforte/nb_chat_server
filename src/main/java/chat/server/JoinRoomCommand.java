@@ -1,4 +1,4 @@
-package network.chat;
+package chat.server;
 
 import chat.common.Message;
 import org.apache.log4j.Logger;

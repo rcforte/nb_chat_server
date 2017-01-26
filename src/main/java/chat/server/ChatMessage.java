@@ -1,4 +1,4 @@
-package network.chat;
+package chat.server;
 
 /**
  * Created by Rafael on 1/21/2017.

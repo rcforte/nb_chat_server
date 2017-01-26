@@ -1,4 +1,4 @@
-package network.chat;
+package chat.server;
 
 import com.google.common.collect.Maps;
 import network.Network;

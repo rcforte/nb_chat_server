@@ -1,9 +1,10 @@
-package network.chat;
+package chat.server;
 
 import chat.common.Message;
 import network.Network;
 import network.NetworkEvent;
 import network.NetworkListener;
+import network.Translator;
 
 import java.nio.channels.SocketChannel;
 import java.util.List;

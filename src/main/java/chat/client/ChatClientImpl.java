@@ -4,8 +4,8 @@ import chat.common.Message;
 import com.google.common.collect.Maps;
 import network.NetworkClient;
 import network.NetworkListener;
-import network.chat.ChatRoom;
-import network.chat.Translator;
+import chat.server.ChatRoom;
+import network.Translator;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
